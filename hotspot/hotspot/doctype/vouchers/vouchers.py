@@ -14,28 +14,31 @@ class Vouchers(Document):
 	def db_insert(self, *args, **kwargs):
 		insert_user(self.as_dict())
 
-		
 	def db_update(self, *args, **kwargs):
-		pass
-	
-	# def save(self, *args, **kwargs):
-	# 	if self.name is exist:
-	# 		self.name = self.name1
-	# 	insert_user(self.as_dict())
-	# 	return super().save(*args, **kwargs)
+		print("*"*100)
+		print(self.as_dict())
+		print(self.name)
+		print(self.name1)
+		print("*"*100)
+		update_voucher(self.name, self.as_dict())
+	def update(self, *args, **kwargs):
+		# self.reload()
+		super().update(*args, **kwargs)
 		
 	def delete(args):
 		delete_user(args.name)
+	
+	# def before_save(self):
+	# 	frappe.msgprint("Before Save")
 
 	def load_from_db(self):
+		self.modified = False
 		d = get_info_user(self.name)
 		d['name1'] = d['name']
 		super(Document, self).__init__(d)
-
 	
 	# def modified(self, *args, **kwargs):
-	# 	return super().save(*args, **kwargs)
-
+	# 	pass
 
 	@staticmethod
 	def get_list(self, *args):
@@ -49,9 +52,7 @@ class Vouchers(Document):
 	def get_stats(args):
 		pass
 
-
 # FUNCTIONS
-
 def get_all_users():
 	frappe.db.commit()
 	for hotspot_controller in Vouchers.hotspot_controllers:
@@ -78,8 +79,6 @@ def insert_user(data):
 			hotspot_controller['password']),
 			verify=False,
 			json=data)
-	frappe.db.commit()
-
 
 def delete_user(name):
 	hotspot_controller = Vouchers.hotspot_controllers[0]
@@ -87,5 +86,15 @@ def delete_user(name):
 			auth=(hotspot_controller['user'],
 			hotspot_controller['password']),
 			verify=False)
-	return True
 
+def update_voucher(voucher,data):
+	data = {
+		"name": data['name1'],
+		'disabled': data['disabled'],
+		}
+	hotspot_controller = Vouchers.hotspot_controllers[0]
+	requests.request("PATCH",f"https://{hotspot_controller['ip']}/rest/ip/hotspot/user/{voucher}",
+			auth=(hotspot_controller['user'],
+			hotspot_controller['password']),
+			verify=False,
+			json=data)
