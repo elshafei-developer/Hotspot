@@ -10,7 +10,8 @@
   "disabled",
   "column_break_qhyg",
   "hotspot_controller",
-  "uptime"
+  "uptime",
+  "limit_uptime"
  ],
  "fields": [
   {
@@ -30,9 +31,6 @@
   {
    "fieldname": "disabled",
    "fieldtype": "Select",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Disabled",
    "options": "false\ntrue"
   },
@@ -46,12 +44,18 @@
    "in_filter": 1,
    "label": "name",
    "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "limit_uptime",
+   "fieldtype": "Time",
+   "label": "Limit Uptime"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2024-03-11 15:27:10.769710",
+ "modified": "2024-03-12 17:49:57.758432",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers",

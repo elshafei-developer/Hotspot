@@ -1,48 +1,31 @@
-# Copyright (c) 2024, hassan elsahfei and contributors
-# For license information, please see license.txt
-
 import requests
 import frappe
 from frappe import _
-from frappe.utils import date_diff, add_days, nowdate
 from frappe.model.document import Document
 
-
 class Vouchers(Document):
-	hotspot_controllers = frappe.get_all('Hotspot Controllers', fields=['*'])
 
 	def db_insert(self, *args, **kwargs):
-		insert_user(self.as_dict())
+		insert_voucher(self.as_dict())
 
 	def db_update(self, *args, **kwargs):
-		print("*"*100)
-		print(self.as_dict())
-		print(self.name)
-		print(self.name1)
-		print("*"*100)
 		update_voucher(self.name, self.as_dict())
-	def update(self, *args, **kwargs):
-		# self.reload()
-		super().update(*args, **kwargs)
+		self.modified = False
 		
 	def delete(args):
-		delete_user(args.name)
+		delete_voucher(args.name)
 	
-	# def before_save(self):
-	# 	frappe.msgprint("Before Save")
-
 	def load_from_db(self):
 		self.modified = False
-		d = get_info_user(self.name)
-		d['name1'] = d['name']
-		super(Document, self).__init__(d)
+		voucher = get_info_voucher(self.name)
+		voucher['name1'] = voucher['name']
+		if 'limit-uptime' in voucher:
+			voucher['limit_uptime'] = extract_time(voucher['limit-uptime'])
+		super(Document, self).__init__(voucher)
 	
-	# def modified(self, *args, **kwargs):
-	# 	pass
-
 	@staticmethod
 	def get_list(self, *args):
-		return get_all_users()
+		return get_all_voucher()
 
 	@staticmethod
 	def get_count(args):
@@ -53,48 +36,70 @@ class Vouchers(Document):
 		pass
 
 # FUNCTIONS
-def get_all_users():
+def get_all_voucher():
 	frappe.db.commit()
-	for hotspot_controller in Vouchers.hotspot_controllers:
-		try:
-			api = requests.request("GET",f"https://{hotspot_controller['ip']}/rest/ip/hotspot/user",auth=(hotspot_controller['user'],hotspot_controller['password']),verify=False)
-			return api.json()
-		except:
-			frappe.throw(_(f"Error: ''{hotspot_controller['name']}'' is not reachable. Please check the connection and try again."))
-			return None
+	IP = get_IP_hotspot_controller()
+	try:
+		api = requests.request("GET",f"https://{IP.ip}/rest/ip/hotspot/user",auth=(IP.user,IP.password),verify=False)
+		return api.json()
+	except:
+		frappe.throw(_(f"Error: hotspot is not reachable. Please check the connection and try again."))
 
-def get_info_user(user):
-	hotspot_controller = Vouchers.hotspot_controllers[0]
-	api = requests.request("GET",f"https://{hotspot_controller['ip']}/rest/ip/hotspot/user/{user}",auth=(hotspot_controller['user'],hotspot_controller['password']),verify=False)
-	return api.json()
+def get_info_voucher(user):
+	IP = get_IP_hotspot_controller()
+	api = requests.request("GET",f"https://{IP.ip}/rest/ip/hotspot/user/{user}",auth=(IP.user,IP.password),verify=False)
+	if api.status_code == 200:
+		return api.json()
+	return frappe.throw(_(f"Error: hotspot is not reachable. Please check the connection and try again."))
 
-def insert_user(data):
+def insert_voucher(data):
 	data = {
 			"name": data['name'],
 			'disabled': data['disabled'],
+			'limit-uptime': data['limit_uptime'],
 			}
-	hotspot_controller = Vouchers.hotspot_controllers[0]
-	requests.request("PUT",f"https://{hotspot_controller['ip']}/rest/ip/hotspot/user",
-			auth=(hotspot_controller['user'],
-			hotspot_controller['password']),
-			verify=False,
-			json=data)
+	IP = get_IP_hotspot_controller()
+	requests.request("PUT",f"https://{IP.ip}/rest/ip/hotspot/user",auth=(IP.user,IP.password),verify=False,json=data)
 
-def delete_user(name):
-	hotspot_controller = Vouchers.hotspot_controllers[0]
-	requests.request("DELETE",f"https://{hotspot_controller['ip']}/rest/ip/hotspot/user/{name}",
-			auth=(hotspot_controller['user'],
-			hotspot_controller['password']),
+def delete_voucher(name):
+	IP = get_IP_hotspot_controller()
+	requests.request("DELETE",f"https://{IP.ip}/rest/ip/hotspot/user/{name}",auth=(IP.user,IP.password),
 			verify=False)
 
 def update_voucher(voucher,data):
 	data = {
 		"name": data['name1'],
 		'disabled': data['disabled'],
+		'limit-uptime':  '00:00:00' if data['limit_uptime'] == None else data['limit_uptime'],
 		}
-	hotspot_controller = Vouchers.hotspot_controllers[0]
-	requests.request("PATCH",f"https://{hotspot_controller['ip']}/rest/ip/hotspot/user/{voucher}",
-			auth=(hotspot_controller['user'],
-			hotspot_controller['password']),
+	IP = get_IP_hotspot_controller()
+	requests.request("PATCH",f"https://{IP.ip}/rest/ip/hotspot/user/{voucher}",auth=(IP.user,IP.password),
 			verify=False,
 			json=data)
+	
+def extract_time(time_str):
+    hours, minutes, seconds, days = 0, 0, 0, 0
+
+    if 'd' in time_str:
+        parts = time_str.split('d')
+        days = int(parts[0])
+        time_str = parts[1]
+
+    if 'h' in time_str:
+        parts = time_str.split('h')
+        hours = int(parts[0])
+        time_str = parts[1]
+    if 'm' in time_str:
+        parts = time_str.split('m')
+        minutes = int(parts[0])
+        time_str = parts[1]
+    if 's' in time_str:
+        seconds = int(time_str.replace('s', ''))
+    
+    formatted_time = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    return formatted_time
+
+def get_IP_hotspot_controller():
+	hotspot_controller = frappe.get_doc('Hotspot Controller')
+	IP_hotspot_controller = hotspot_controller.as_dict()
+	return IP_hotspot_controller

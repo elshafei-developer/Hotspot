@@ -1,12 +1,11 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{name1}",
+ "autoname": "prompt",
  "creation": "2024-03-09 18:02:22.429437",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "name1",
   "ip",
   "user",
   "password"
@@ -26,20 +25,15 @@
    "fieldname": "password",
    "fieldtype": "Data",
    "label": "Password"
-  },
-  {
-   "fieldname": "name1",
-   "fieldtype": "Data",
-   "label": "Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-09 18:07:06.253965",
+ "modified": "2024-03-12 14:34:40.687589",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Hotspot Controllers",
- "naming_rule": "Expression",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
