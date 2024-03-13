@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "name1",
+  "status",
   "disabled",
   "column_break_qhyg",
   "hotspot_controller",
@@ -29,12 +30,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "disabled",
-   "fieldtype": "Select",
-   "label": "Disabled",
-   "options": "false\ntrue"
-  },
-  {
    "fieldname": "column_break_qhyg",
    "fieldtype": "Column Break"
   },
@@ -50,12 +45,26 @@
    "fieldname": "limit_uptime",
    "fieldtype": "Time",
    "label": "Limit Uptime"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Active\nInactive"
+  },
+  {
+   "default": "false",
+   "fieldname": "disabled",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Disabled",
+   "options": "false\ntrue"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2024-03-12 17:49:57.758432",
+ "modified": "2024-03-13 12:04:09.573541",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers",

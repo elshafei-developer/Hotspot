@@ -1,23 +1,7 @@
-// Copyright (c) 2024, hassan elsahfei and contributors
-// For license information, please see license.txt
-
 frappe.ui.form.on("Vouchers", {
-  refresh(frm) {},
+  after_save(frm) {
+    name1 = frm.doc.name1.replace(/ /g, "_");
+    frappe.set_route("Form", "Vouchers", name1);
+    frm.set_value("name1", name1);
+  },
 });
-frappe.listview_settings["Vouchers"] = {
-  get_indicator(doc) {
-    // customize indicator color
-    if (doc.disabled == "false") {
-      doc.status = "Active";
-    } else {
-      return [__("Inactive"), "darkgrey", "status,=,else"];
-    }
-  },
-  before_render(doc) {
-    if (doc.disabled == "false") {
-      doc.status = "Active";
-    } else {
-      return [__("Inactive"), "red", "status,=,else"];
-    }
-  },
-};
