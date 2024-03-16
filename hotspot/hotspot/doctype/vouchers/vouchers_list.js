@@ -1,6 +1,4 @@
 frappe.listview_settings["Vouchers"] = {
-  // add_fields: ["status"],
-  filters: [["status", "=", "Active"]],
   button: {
     show(doc) {
       return doc.status === "Active";
@@ -16,8 +14,6 @@ frappe.listview_settings["Vouchers"] = {
     },
   },
   onload: function (listview) {
-    // console.log(listview.page);
-    // console.log(listview.filters);
     listview.page.add_inner_button(
       "Delete Inactive Vouchers",
       () => {
@@ -46,6 +42,12 @@ frappe.listview_settings["Vouchers"] = {
     );
   },
 };
+
+frappe.realtime.on("hotspot_disconnected", (data) => {
+  for (let i = 0; i < data.length; i++) {
+    frappe.show_alert(`Hotspot "${data[i]}" is Not Connected.`, 5);
+  }
+});
 
 print = (name) => {
   var print_format = "Voucher";

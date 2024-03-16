@@ -1,5 +1,11 @@
 frappe.ui.form.on("Vouchers", {
   refresh: function (frm) {
+    frm.set_df_property(
+      "hotspot_controller",
+      "read_only",
+      frm.is_new() ? 0 : 1
+    );
+
     if (!frm.is_new()) {
       frm.add_custom_button(
         __("Print"),
