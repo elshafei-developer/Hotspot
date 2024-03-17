@@ -2,7 +2,6 @@ import requests
 import frappe
 from frappe import _
 from frappe.model.document import Document
-
 class Vouchers(Document):
 
 	def db_insert(self, *args, **kwargs):
@@ -12,13 +11,15 @@ class Vouchers(Document):
 	def db_update(self, *args, **kwargs):
 		update_voucher(self.name, self.as_dict())
 		self.modified = False
-		
+
+	def update(self, *args, **kwargs):
+		return super().update(*args)
 	def delete(args):
 		delete_voucher(args.name)
 
 	def load_from_db(self):
 		self.modified = False
-		voucher = get_info_voucher(self.name)
+		voucher = get_voucher(self.name)
 		super(Document, self).__init__(voucher)
 	
 	@staticmethod
@@ -29,46 +30,42 @@ class Vouchers(Document):
 	@staticmethod
 	def get_count(args):
 		pass	
+	@staticmethod
 	def get_stats(args):
 		pass
 
+	def print(args):
+		frappe.throw(_(f"Error: The voucher could not be printed."))
+
 # FUNCTIONS
 def get_vouchers():
-	all_vouchers = []
 	vouchers = connect_hotspot('GET')
 	if vouchers == False:
 		frappe.throw(_(f"Error: The hotspot controller is disconnected."))
 	else:
 		vouchers.pop(0)
-		data_map = lambda x: {'name': x['name'],
-							'status': 'Active' if x['disabled'] == 'false' else 'Inactive',
-							'uptime': x['uptime'],
-							'limit_uptime': extract_time(x['limit-uptime']) if 'limit-uptime' in x else None,
+		data_map = lambda v: {'name': v['name'],
+							'status': 'Active' if v['disabled'] == 'false' else 'Inactive',
+							'uptime': v['uptime'],
+							'limit_uptime': extract_time(v['limit-uptime']) if 'limit-uptime' in v else None,
 							}
 		vouchers_map = list(map(data_map, vouchers))
-		all_vouchers += vouchers_map
-	return all_vouchers
+	return vouchers_map
 
-def get_info_voucher(voucher):
+def get_voucher(voucher):
 	response  = connect_hotspot('GET',voucher)
-	if response == False:
-		frappe.throw(_(f"Error: The hotspot controller is disconnected."))
-	else:
-		info_voucher = response
-		info_voucher['name1'] = info_voucher['name']
-		info_voucher['status'] = 'Active' if info_voucher['disabled'] == 'false' else 'Inactive'
-		if 'limit-uptime' in info_voucher:
-			info_voucher['limit_uptime'] = extract_time(info_voucher['limit-uptime'])
-		return info_voucher
+	info_voucher = response
+	info_voucher['name1'] = info_voucher['name']
+	info_voucher['status'] = 'Active' if info_voucher['disabled'] == 'false' else 'Inactive'
+	if 'limit-uptime' in info_voucher:
+		info_voucher['limit_uptime'] = extract_time(info_voucher['limit-uptime'])
+	return info_voucher
 	
-
 def insert_voucher(data):
-	# voucher_exists(data['name1'])
 	data = voucher_structure(data)
 	connect_hotspot('PUT',data)
 
 def update_voucher(voucher,data):
-	# voucher_exists(data['name1'],data['name'])
 	data = voucher_structure(data)
 	connect_hotspot('PATCH',data,voucher)
 
@@ -84,7 +81,8 @@ def voucher_exists(new_name,old_name=None):
 		vouchers_exists.pop(vouchers_exists.index(old_name))
 	if new_name in vouchers_exists:
 		frappe.throw(_(f"Error: The voucher '{new_name}' already exists."))
-	
+
+# structure of voucher that MikroTik Accept
 def voucher_structure(data):
 	return {
 		"name": data['name1'].replace(' ','_'),
@@ -112,6 +110,7 @@ def extract_time(time_str):
     formatted_time = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
     return formatted_time
 
+# REST API
 def connect_hotspot(method,data=None,voucher=None):
 	hotspot_controller = frappe.get_doc('Hotspot Controller')
 	ip = hotspot_controller.ip
@@ -127,7 +126,77 @@ def connect_hotspot(method,data=None,voucher=None):
 	if method == 'PATCH':
 		return PATCH(ip,admin,password,data,voucher)
 
-# ##### List View ##### #
+def GET(ip,admin,password,name):
+	if name:
+		try:
+			api = requests.request("GET",f"https://{ip}/rest/ip/hotspot/user/{name}",auth=(admin,password),verify=False)
+			if api.status_code == 200:
+				return api.json()
+			else:
+				frappe.throw(_(f"Error: {api.status_code}"))
+				return False
+		except requests.exceptions.RequestException as e:
+			frappe.throw(_(f"Error: => {e}"))
+			return False
+	else:
+		try:
+			api = requests.request("GET",f"https://{ip}/rest/ip/hotspot/user",auth=(admin,password),verify=False)
+			if api.status_code == 200:
+				return api.json()
+			else:
+				frappe.throw(_(f"Error: {api.status_code}"))
+				return False
+		except requests.exceptions.RequestException as e:
+			frappe.throw(_(f"Error: => {e}"))
+			return False
+
+def PUT(ip,admin,password,data):
+	if data == None:
+		frappe.throw(_(f"Error: The voucher could not be created Empty."))
+	voucher_exists(data['name'])
+	try:
+		api = requests.request("PUT",f"https://{ip}/rest/ip/hotspot/user",auth=(admin,password),json=data,verify=False)
+		if api.status_code == 201:
+			return True
+		else:
+			frappe.throw(_(f"Error: {api.status_code}"))
+			return False
+	except requests.exceptions.RequestException as e:
+		frappe.throw(_(f"Error: => {e}"))
+		return False
+
+def DELETE(ip,admin,password,voucher):
+	if voucher == None:
+		frappe.throw(_(f"Error: A name Voucher must be given to delete the Voucher"))
+	try:
+		api = requests.request("DELETE",f"https://{ip}/rest/ip/hotspot/user/{voucher}",auth=(admin,password),verify=False)
+		if api.status_code == 204:
+			return True
+		else:
+			frappe.throw(_(f"Error: {api.status_code}"))
+			return False
+	except requests.exceptions.RequestException as e:
+		frappe.throw(_(f"Error: => {e}"))
+		return False
+	
+def PATCH(ip,admin,password,data,voucher):
+	if voucher == None:
+		frappe.throw(_(f"Error: A name must be given to Update the Voucher"))
+	voucher_exists(data['name'],voucher)
+	try:
+		api = requests.request("PATCH",f"https://{ip}/rest/ip/hotspot/user/{voucher}",auth=(admin,password),verify=False,json=data)
+		if api.status_code == 200:
+			return True
+		else:
+			frappe.throw(_(f"Error: {api.status_code}"))
+			return False
+	except requests.exceptions.RequestException as e:
+		frappe.throw(_(f"Error: => {e}"))
+		return False
+
+
+
+# ## @frappe.whitelist() ## #
 @frappe.whitelist()
 def delete_inactive_vouchers():
 	hotspot_controller = frappe.get_doc('Hotspot Controller')
@@ -146,66 +215,6 @@ def delete_inactive_vouchers():
 			frappe.throw(_(f"Error: The voucher '{voucher['name']}' could not be deleted."))
 	frappe.msgprint(_(f"Vouchers Inactive deleted successfully."))
 
-
-def GET(ip,admin,password,voucher):
-	if voucher:
-		try:
-			api = requests.request("GET",f"https://{ip}/rest/ip/hotspot/user/{voucher}",auth=(admin,password),verify=False)
-			if api.status_code == 200:
-				return api.json()
-			else:
-				return False
-		except requests.exceptions.RequestException as e:
-			return False
-	else:
-		try:
-			api = requests.request("GET",f"https://{ip}/rest/ip/hotspot/user",auth=(admin,password),verify=False)
-			if api.status_code == 200:
-				return api.json()
-			else:
-				return False
-		except requests.exceptions.RequestException as e:
-			return False
-
-def PUT(ip,admin,password,data):
-	voucher_exists(data['name'])
-	if data == None:
-		frappe.throw(_(f"Error: The voucher could not be created Empty."))
-	try:
-		api = requests.request("PUT",f"https://{ip}/rest/ip/hotspot/user",auth=(admin,password),json=data,verify=False)
-		if api.status_code == 201:
-			return True
-		else:
-			frappe.throw(_(f"Error: The voucher could not be created."))
-			return False
-	except requests.exceptions.RequestException as e:
-		frappe.throw(_(f"Error: => {e}"))
-		return False
-
-def DELETE(ip,admin,password,name):
-	if name == None:
-		frappe.throw(_(f"Error: A name must be given to delete the Voucher"))
-	try:
-		api = requests.request("DELETE",f"https://{ip}/rest/ip/hotspot/user/{name}",auth=(admin,password),verify=False)
-		if api.status_code == 204:
-			return True
-		else:
-			frappe.throw(_(f"Error: The voucher could not be Delete"))
-			return False
-	except requests.exceptions.RequestException as e:
-		frappe.throw(_(f"Error: => {e}"))
-		return False
-def PATCH(ip,admin,password,data,voucher):
-	voucher_exists(data['name'],voucher)
-	if voucher == None:
-		frappe.throw(_(f"Error: A name must be given to Update the Voucher"))
-	try:
-		api = requests.request("PATCH",f"https://{ip}/rest/ip/hotspot/user/{voucher}",auth=(admin,password),verify=False,json=data)
-		if api.status_code == 200:
-			return True
-		else:
-			frappe.throw(_(f"Error: The voucher could not be Update."))
-			return False
-	except requests.exceptions.RequestException as e:
-		frappe.throw(_(f"Error: => {e}"))
-		return False
+@frappe.whitelist()
+def print_all_vouchers(data):
+	frappe.throw(_(f"{data}"))

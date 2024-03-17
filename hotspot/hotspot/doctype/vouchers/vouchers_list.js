@@ -40,6 +40,35 @@ frappe.listview_settings["Vouchers"] = {
       },
       "Actions"
     );
+    listview.page.add_inner_button(
+      "Print All Vouchers",
+      () => {
+        let checked_items = cur_list.get_checked_items(true);
+        console.log(checked_items.length);
+        console.log(checked_items);
+        // frappe.confirm(
+        //   "Are you sure you want to print all vouchers?",
+        //   function () {
+        //     frappe
+        //       .call({
+        //         method:
+        //           "hotspot.hotspot.doctype.vouchers.vouchers.print_all_vouchers",
+        //         callback: function (r) {
+        //           if (r.message) {
+        //             frappe.msgprint(r.message);
+        //           }
+        //         },
+        //         freeze: true,
+        //         freeze_message: "Printing Vouchers...",
+        //       })
+        //       .then(() => {
+        //         listview.refresh();
+        //       });
+        //   }
+        // );
+      },
+      "Actions"
+    );
   },
 };
 
@@ -69,3 +98,10 @@ print = (name) => {
     return;
   }
 };
+
+// var doc = {};
+// doc.test = "Mr. Test";
+// let result = frappe.render_template("<h1>Hello {{ doc.test }}</h1>", {
+//   doc: doc,
+// });
+// frappe.render_pdf(result, { orientation: "Portrait" }); // orientation takes "Portrait" or "Landscape"
