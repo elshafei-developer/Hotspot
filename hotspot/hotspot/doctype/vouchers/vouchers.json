@@ -11,7 +11,8 @@
   "disabled",
   "column_break_qhyg",
   "uptime",
-  "limit_uptime"
+  "limit_uptime",
+  "barcode"
  ],
  "fields": [
   {
@@ -63,12 +64,17 @@
    "hidden": 1,
    "label": "Disabled",
    "options": "false\ntrue"
+  },
+  {
+   "fieldname": "barcode",
+   "fieldtype": "Barcode",
+   "label": "barcode"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2024-03-17 14:28:37.659634",
+ "modified": "2024-03-18 13:46:20.874704",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers",

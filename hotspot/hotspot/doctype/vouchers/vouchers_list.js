@@ -15,7 +15,7 @@ frappe.listview_settings["Vouchers"] = {
   },
   onload: function (listview) {
     listview.page.add_inner_button(
-      "Delete Inactive Vouchers",
+      __("Delete Inactive Vouchers"),
       () => {
         frappe.confirm(
           "Are you sure you want to delete all inactive vouchers?",
@@ -41,62 +41,52 @@ frappe.listview_settings["Vouchers"] = {
       "Actions"
     );
     listview.page.add_inner_button(
-      "Print All Vouchers",
+      __("Print Vouchers"),
       () => {
-        let checked_items = cur_list.get_checked_items(true);
-        console.log(checked_items.length);
-        console.log(checked_items);
-        // frappe.confirm(
-        //   "Are you sure you want to print all vouchers?",
-        //   function () {
-        //     frappe
-        //       .call({
-        //         method:
-        //           "hotspot.hotspot.doctype.vouchers.vouchers.print_all_vouchers",
-        //         callback: function (r) {
-        //           if (r.message) {
-        //             frappe.msgprint(r.message);
-        //           }
-        //         },
-        //         freeze: true,
-        //         freeze_message: "Printing Vouchers...",
-        //       })
-        //       .then(() => {
-        //         listview.refresh();
-        //       });
-        //   }
-        // );
+        frappe.call({
+          method: "hotspot.hotspot.doctype.vouchers.vouchers.print_vouchers",
+          args: {
+            data: cur_list.get_checked_items(true),
+          },
+          callback: function (r) {
+            if (r.message) {
+              frappe.render_pdf(r.message, { orientation: "Portrait" });
+            }
+          },
+          freeze: true,
+          freeze_message: "Printing Vouchers...",
+        });
       },
       "Actions"
     );
   },
 };
 
-frappe.realtime.on("hotspot_disconnected", (data) => {
-  for (let i = 0; i < data.length; i++) {
-    frappe.show_alert(`Hotspot "${data[i]}" is Not Connected.`, 5);
-  }
-});
-
 print = (name) => {
-  var print_format = "Voucher";
-  var w = window.open(
-    frappe.urllib.get_full_url(
-      "/api/method/frappe.utils.print_format.download_pdf?"
-    ) +
-      "doctype=" +
-      encodeURIComponent("Vouchers") +
-      "&name=" +
-      encodeURIComponent(name) +
-      "&format=" +
-      encodeURIComponent(print_format) +
-      "&no_letterhead=0" +
-      "&_lang=en"
-  );
-  if (!w) {
-    frappe.msgprint(__("Please enable pop-ups"));
-    return;
-  }
+  // var doc = {};
+  // doc.test = "Mr. Test";
+  // let result = frappe.render_template("<h1>Hello {{ doc.test }}</h1>", {
+  //   doc: doc,
+  // });
+  // frappe.render_pdf(result, { orientation: "Portrait" });
+  // var print_format = "Print Vouchers";
+  // var w = window.open(
+  //   frappe.urllib.get_full_url(
+  //     "/api/method/frappe.utils.print_format.download_pdf?"
+  //   ) +
+  //     "doctype=" +
+  //     encodeURIComponent("Vouchers") +
+  //     "&name=" +
+  //     encodeURIComponent(name) +
+  //     "&format=" +
+  //     encodeURIComponent(print_format) +
+  //     "&no_letterhead=0" +
+  //     "&_lang=en"
+  // );
+  // if (!w) {
+  //   frappe.msgprint(__("Please enable pop-ups"));
+  //   return;
+  // }
 };
 
 // var doc = {};

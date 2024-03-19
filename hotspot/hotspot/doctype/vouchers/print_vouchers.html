@@ -1,0 +1,51 @@
+<body>
+  <style>
+    @media print {
+      * {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+      }
+      p {
+        font-weight: bold;
+      }
+      ul {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+      }
+      li {
+        margin: 5px 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .QR {
+        margin: 5px;
+        width: 120px;
+        height: 120px;
+      }
+    }
+  </style>
+  <ul>
+    {% for item in data %}
+    <li>
+      <p>شركة آمال الشرق</p>
+      <p>AMAL ALSHARQ</p>
+      <div class="QR">
+        <img
+          width="100%"
+          height="100%"
+          alt=""
+          src="https://qrcode.tec-it.com/API/QRCode?data=http%3a%2f%2famal-shark.com%2flogin%3fusername%3d{{item.name}}%26password%3d{{item.name}}&backcolor=%23ffffff"
+        />
+        <img />
+      </div>
+      <p>{{item.name}}</p>
+    </li>
+    {% endfor %}
+  </ul>
+</body>

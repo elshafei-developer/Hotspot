@@ -2,11 +2,17 @@ import requests
 import frappe
 from frappe import _
 from frappe.model.document import Document
+import json
+from PIL import Image
+import io
+
+
 class Vouchers(Document):
+
 
 	def db_insert(self, *args, **kwargs):
 		insert_voucher(self.as_dict())
-		self.modified = False
+		self.print_templates = 'voucher'
 
 	def db_update(self, *args, **kwargs):
 		update_voucher(self.name, self.as_dict())
@@ -69,8 +75,8 @@ def update_voucher(voucher,data):
 	data = voucher_structure(data)
 	connect_hotspot('PATCH',data,voucher)
 
-def delete_voucher(name):
-	connect_hotspot('DELETE',name)
+def delete_voucher(voucher):
+	connect_hotspot('DELETE',voucher)
 
 
 
@@ -147,7 +153,7 @@ def GET(ip,admin,password,name):
 				frappe.throw(_(f"Error: {api.status_code}"))
 				return False
 		except requests.exceptions.RequestException as e:
-			frappe.throw(_(f"Error: => {e}"))
+			frappe.throw(_(f"Error: => Hotspot Controller is disconnected."))
 			return False
 
 def PUT(ip,admin,password,data):
@@ -216,5 +222,33 @@ def delete_inactive_vouchers():
 	frappe.msgprint(_(f"Vouchers Inactive deleted successfully."))
 
 @frappe.whitelist()
-def print_all_vouchers(data):
-	frappe.throw(_(f"{data}"))
+def print_vouchers(data):
+	data = json.loads(data)
+	info_voucher = []
+	for voucher in data:
+		v = {}
+		v['name'] = voucher
+		# v['qr_code'] = generate_qr_code(voucher)
+		info_voucher.append(v)
+	response = frappe.render_template('hotspot/hotspot/doctype/vouchers/print_vouchers.html', {'data': info_voucher})
+	return response
+
+
+# import qrcode
+# from io import BytesIO
+
+# def generate_qr_code(data):
+#     qr = qrcode.QRCode(
+#         version=1,
+#         error_correction=qrcode.constants.ERROR_CORRECT_L,
+#         box_size=10,
+#         border=4,
+#     )
+#     qr.add_data(data)
+#     qr.make(fit=True)
+
+#     img = qr.make_image(fill_color="black", back_color="white")
+#     buffer = BytesIO()
+#     img.save(buffer, format="PNG")
+
+#     return buffer.getvalue()
