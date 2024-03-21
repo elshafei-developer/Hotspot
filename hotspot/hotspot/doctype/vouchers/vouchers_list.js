@@ -13,6 +13,7 @@ frappe.listview_settings["Vouchers"] = {
       print(doc.name);
     },
   },
+
   onload: function (listview) {
     listview.page.add_inner_button(
       __("Delete Inactive Vouchers"),
@@ -50,7 +51,7 @@ frappe.listview_settings["Vouchers"] = {
           },
           callback: function (r) {
             if (r.message) {
-              frappe.render_pdf(r.message, { orientation: "Portrait" });
+              pdf = frappe.render_pdf(r.message, { orientation: "Portrait" });
             }
           },
           freeze: true,
@@ -59,6 +60,19 @@ frappe.listview_settings["Vouchers"] = {
       },
       "Actions"
     );
+    listview.page.add_inner_button("Test Print", () => {
+      // listview.refresh();
+      // window.location.href = frappe.urllib.get_full_url("hassan");
+
+      frappe.call({
+        method: "hotspot.hotspot.doctype.vouchers.vouchers.test",
+        args: { data: cur_list.get_checked_items(true) },
+        callback: (r) => {
+          console.log("CallBack");
+          window.location.href = frappe.urllib.get_full_url(r.message);
+        },
+      });
+    });
   },
 };
 
@@ -69,24 +83,24 @@ print = (name) => {
   //   doc: doc,
   // });
   // frappe.render_pdf(result, { orientation: "Portrait" });
-  // var print_format = "Print Vouchers";
-  // var w = window.open(
-  //   frappe.urllib.get_full_url(
-  //     "/api/method/frappe.utils.print_format.download_pdf?"
-  //   ) +
-  //     "doctype=" +
-  //     encodeURIComponent("Vouchers") +
-  //     "&name=" +
-  //     encodeURIComponent(name) +
-  //     "&format=" +
-  //     encodeURIComponent(print_format) +
-  //     "&no_letterhead=0" +
-  //     "&_lang=en"
-  // );
-  // if (!w) {
-  //   frappe.msgprint(__("Please enable pop-ups"));
-  //   return;
-  // }
+  var print_format = "Print Vouchers";
+  var w = window.open(
+    frappe.urllib.get_full_url(
+      "/api/method/frappe.utils.print_format.download_pdf?"
+    ) +
+      "doctype=" +
+      encodeURIComponent("Vouchers") +
+      "&name=" +
+      encodeURIComponent(name) +
+      "&format=" +
+      encodeURIComponent(print_format) +
+      "&no_letterhead=0" +
+      "&_lang=en"
+  );
+  if (!w) {
+    frappe.msgprint(__("Please enable pop-ups"));
+    return;
+  }
 };
 
 // var doc = {};

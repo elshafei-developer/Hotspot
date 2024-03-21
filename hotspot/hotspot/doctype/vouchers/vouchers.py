@@ -5,6 +5,9 @@ from frappe.model.document import Document
 import json
 from PIL import Image
 import io
+from frappe.utils.print_format import download_multi_pdf
+from frappe.utils.pdf import get_pdf
+from frappe.utils.weasyprint import PrintFormatGenerator
 
 
 class Vouchers(Document):
@@ -139,7 +142,7 @@ def GET(ip,admin,password,name):
 			if api.status_code == 200:
 				return api.json()
 			else:
-				frappe.throw(_(f"Error: {api.status_code}"))
+				frappe.throw(_(f"Error: {api.status_code} Not Found."))
 				return False
 		except requests.exceptions.RequestException as e:
 			frappe.throw(_(f"Error: => {e}"))
@@ -224,31 +227,19 @@ def delete_inactive_vouchers():
 @frappe.whitelist()
 def print_vouchers(data):
 	data = json.loads(data)
-	info_voucher = []
+	vouchers = []
 	for voucher in data:
 		v = {}
 		v['name'] = voucher
 		# v['qr_code'] = generate_qr_code(voucher)
-		info_voucher.append(v)
-	response = frappe.render_template('hotspot/hotspot/doctype/vouchers/print_vouchers.html', {'data': info_voucher})
+		vouchers.append(v)
+	response = frappe.render_template('hotspot/hotspot/doctype/vouchers/print_vouchers.html', {'data': vouchers})
 	return response
 
+@frappe.whitelist()
+def test(data):
 
-# import qrcode
-# from io import BytesIO
-
-# def generate_qr_code(data):
-#     qr = qrcode.QRCode(
-#         version=1,
-#         error_correction=qrcode.constants.ERROR_CORRECT_L,
-#         box_size=10,
-#         border=4,
-#     )
-#     qr.add_data(data)
-#     qr.make(fit=True)
-
-#     img = qr.make_image(fill_color="black", back_color="white")
-#     buffer = BytesIO()
-#     img.save(buffer, format="PNG")
-
-#     return buffer.getvalue()
+	response = frappe.render_template('hotspot/hotspot/doctype/vouchers/print_vouchers.html', {'data': data})
+	# # open('print_vouchers.html', 'w').write(response)
+	return response
+	# frappe.render_pdf('hotspot/hotspot/doctype/vouchers/print_vouchers.html', {'data': [{'name': '1234567890'}]})
