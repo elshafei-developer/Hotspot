@@ -2,19 +2,9 @@ import requests
 import frappe
 from frappe import _
 from frappe.model.document import Document
-import json
-from PIL import Image
-import io
-from frappe.utils.print_format import download_multi_pdf
-from frappe.utils.pdf import get_pdf
-from frappe.utils import get_url
-from frappe.utils import get_host_name
-from frappe.utils.weasyprint import PrintFormatGenerator
-
+from frappe import json
 
 class Vouchers(Document):
-
-
 	def db_insert(self, *args, **kwargs):
 		insert_voucher(self.as_dict())
 		self.print_templates = 'voucher'
@@ -208,7 +198,7 @@ def PATCH(ip,admin,password,data,voucher):
 
 
 
-# ## @frappe.whitelist() ## #
+# ## ACTION ## #
 @frappe.whitelist()
 def delete_inactive_vouchers():
 	hotspot_controller = frappe.get_doc('Hotspot Controller')
@@ -240,16 +230,17 @@ def print_vouchers(data):
 	return response
 
 @frappe.whitelist()
-def test(data):
-	data = json.loads(data)
-	response =  frappe.render_template('hotspot/hotspot/doctype/vouchers/print_vouchers.html', {'data': data})
-	return response
-
-@frappe.whitelist()
-def on_button_click(data):
-    # Process or validate data if needed
-    target_url = get_url(
-        "hassan",  # Replace with the actual doctype (optional)
-        data=data
-    )
-    frappe.redirect(target_url)
+def create_printer_voucher(name, vouchers):
+	doc = frappe.new_doc('Vouchers Printer')
+	doc.name = name
+	vouchers = json.loads(vouchers)
+	if vouchers == []:
+		frappe.throw(_(f"Error: The printer could not be created Empty."))
+		return False
+	else:
+		for voucher in list(vouchers):
+			doc.append('vouchers_table', {
+				'voucher': voucher,
+			})
+		doc.insert()
+		return name

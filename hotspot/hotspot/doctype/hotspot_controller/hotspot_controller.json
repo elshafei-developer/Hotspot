@@ -7,7 +7,9 @@
  "field_order": [
   "ip",
   "user",
-  "password"
+  "password",
+  "column_break_ifxp",
+  "hotspot_table"
  ],
  "fields": [
   {
@@ -24,12 +26,22 @@
    "fieldname": "password",
    "fieldtype": "Data",
    "label": "Password"
+  },
+  {
+   "fieldname": "column_break_ifxp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hotspot_table",
+   "fieldtype": "Table",
+   "label": "Hotspot Table",
+   "options": "Hotspot Table"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-09 17:56:50.869687",
+ "modified": "2024-03-28 16:45:43.292433",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Hotspot Controller",

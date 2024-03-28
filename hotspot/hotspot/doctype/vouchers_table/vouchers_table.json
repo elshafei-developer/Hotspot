@@ -7,38 +7,21 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "printer",
-  "voucher",
-  "uptime"
+  "voucher"
  ],
  "fields": [
-  {
-   "fieldname": "uptime",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "label": "Uptime",
-   "read_only": 1
-  },
   {
    "fieldname": "voucher",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Voucher",
    "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "printer",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "label": "Printer"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-24 14:52:47.287774",
+ "modified": "2024-03-28 16:31:14.986000",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers Table",

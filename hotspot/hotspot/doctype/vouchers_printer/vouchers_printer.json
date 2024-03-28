@@ -6,32 +6,25 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "test",
-  "vouchers_table",
-  "v_test"
+  "vouchers_table_section",
+  "vouchers_table"
  ],
  "fields": [
   {
    "fieldname": "vouchers_table",
    "fieldtype": "Table",
-   "label": "Vouchers Table",
+   "label": "Voucher Table That will Printer",
    "options": "Vouchers Table"
   },
   {
-   "fieldname": "test",
-   "fieldtype": "Data",
-   "label": "test"
-  },
-  {
-   "fieldname": "v_test",
-   "fieldtype": "Data",
-   "is_virtual": 1,
-   "label": "v_test"
+   "fieldname": "vouchers_table_section",
+   "fieldtype": "Section Break",
+   "label": "Vouchers Table"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 13:08:48.890148",
+ "modified": "2024-03-28 15:28:17.031102",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers Printer",

@@ -1,19 +1,4 @@
 frappe.listview_settings["Vouchers"] = {
-  button: {
-    show(doc) {
-      return doc.status === "Active";
-    },
-    get_label() {
-      return "Print";
-    },
-    get_description(doc) {
-      return __([`Print ${doc.name}`]);
-    },
-    action(doc) {
-      print(doc.name);
-    },
-  },
-
   onload: function (listview) {
     listview.page.add_inner_button(
       __("Delete Inactive Vouchers"),
@@ -42,7 +27,56 @@ frappe.listview_settings["Vouchers"] = {
       "Actions"
     );
     listview.page.add_inner_button(
-      __("Print Vouchers"),
+      "Create Printer Voucher",
+      () => {
+        let d = new frappe.ui.Dialog({
+          title: "Enter details",
+          fields: [
+            {
+              label: "Name DocType",
+              fieldname: "name_doc",
+              fieldtype: "Data",
+            },
+          ],
+          size: "small",
+          primary_action_label: "Create",
+          primary_action(values) {
+            frappe.call({
+              method:
+                "hotspot.hotspot.doctype.vouchers.vouchers.create_printer_voucher",
+              args: {
+                name: this.get_value("name_doc"),
+                vouchers: cur_list.get_checked_items(true),
+              },
+              callback: function (r) {
+                if (r.message != false) {
+                  d.hide();
+                  frappe.show_alert({
+                    message: __("Vouchers Printer Created"),
+                    indicator: "green",
+                  });
+                  frappe.confirm(
+                    __("Do You Want Move To This Vouchers Printer"),
+                    () => {
+                      frappe.set_route("Form", "Vouchers Printer", r.message);
+                    }
+                  );
+                }
+              },
+            });
+          },
+        });
+        if (cur_list.get_checked_items(true).length >= 1) {
+          d.show();
+        } else {
+          frappe.throw(__("Please select vouchers to create printer voucher"));
+          return;
+        }
+      },
+      "Actions"
+    );
+    listview.page.add_inner_button(
+      __("Download Vouchers Printr"),
       () => {
         frappe.call({
           method: "hotspot.hotspot.doctype.vouchers.vouchers.print_vouchers",
@@ -60,40 +94,5 @@ frappe.listview_settings["Vouchers"] = {
       },
       "Actions"
     );
-    listview.page.add_inner_button("Test Print", () => {
-      console.log(cur_list.get_checked_items(true));
-      frappe.call({
-        method: "hotspot.hotspot.doctype.vouchers.vouchers.test",
-        args: { data: cur_list.get_checked_items(true) },
-        callback: function (data) {
-          const printContent = data.message;
-          const printWindow = window.open("", "_blank");
-          printWindow.document.write(printContent);
-          printWindow.document.close();
-          printWindow.print();
-        },
-      });
-    });
   },
-};
-
-print = (name) => {
-  var print_format = "Print Vouchers";
-  var w = window.open(
-    frappe.urllib.get_full_url(
-      "/api/method/frappe.utils.print_format.download_pdf?"
-    ) +
-      "doctype=" +
-      encodeURIComponent("Vouchers") +
-      "&name=" +
-      encodeURIComponent(name) +
-      "&format=" +
-      encodeURIComponent(print_format) +
-      "&no_letterhead=0" +
-      "&_lang=en"
-  );
-  if (!w) {
-    frappe.msgprint(__("Please enable pop-ups"));
-    return;
-  }
 };
