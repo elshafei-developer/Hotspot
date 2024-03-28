@@ -1,0 +1,57 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "prompt",
+ "creation": "2024-03-23 13:57:03.495493",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "test",
+  "vouchers_table",
+  "v_test"
+ ],
+ "fields": [
+  {
+   "fieldname": "vouchers_table",
+   "fieldtype": "Table",
+   "label": "Vouchers Table",
+   "options": "Vouchers Table"
+  },
+  {
+   "fieldname": "test",
+   "fieldtype": "Data",
+   "label": "test"
+  },
+  {
+   "fieldname": "v_test",
+   "fieldtype": "Data",
+   "is_virtual": 1,
+   "label": "v_test"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-03-27 13:08:48.890148",
+ "modified_by": "Administrator",
+ "module": "Hotspot",
+ "name": "Vouchers Printer",
+ "naming_rule": "Set by user",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

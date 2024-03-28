@@ -7,6 +7,8 @@ from PIL import Image
 import io
 from frappe.utils.print_format import download_multi_pdf
 from frappe.utils.pdf import get_pdf
+from frappe.utils import get_url
+from frappe.utils import get_host_name
 from frappe.utils.weasyprint import PrintFormatGenerator
 
 
@@ -47,6 +49,7 @@ class Vouchers(Document):
 		frappe.throw(_(f"Error: The voucher could not be printed."))
 
 # FUNCTIONS
+@frappe.whitelist()
 def get_vouchers():
 	vouchers = connect_hotspot('GET')
 	if vouchers == False:
@@ -134,7 +137,7 @@ def connect_hotspot(method,data=None,voucher=None):
 		return DELETE(ip,admin,password,data)
 	if method == 'PATCH':
 		return PATCH(ip,admin,password,data,voucher)
-
+	
 def GET(ip,admin,password,name):
 	if name:
 		try:
@@ -142,7 +145,7 @@ def GET(ip,admin,password,name):
 			if api.status_code == 200:
 				return api.json()
 			else:
-				frappe.throw(_(f"Error: {api.status_code} Not Found."))
+				frappe.throw(_(f"Error: {api.status_code} Not Found"))
 				return False
 		except requests.exceptions.RequestException as e:
 			frappe.throw(_(f"Error: => {e}"))
@@ -238,8 +241,15 @@ def print_vouchers(data):
 
 @frappe.whitelist()
 def test(data):
-
-	response = frappe.render_template('hotspot/hotspot/doctype/vouchers/print_vouchers.html', {'data': data})
-	# # open('print_vouchers.html', 'w').write(response)
+	data = json.loads(data)
+	response =  frappe.render_template('hotspot/hotspot/doctype/vouchers/print_vouchers.html', {'data': data})
 	return response
-	# frappe.render_pdf('hotspot/hotspot/doctype/vouchers/print_vouchers.html', {'data': [{'name': '1234567890'}]})
+
+@frappe.whitelist()
+def on_button_click(data):
+    # Process or validate data if needed
+    target_url = get_url(
+        "hassan",  # Replace with the actual doctype (optional)
+        data=data
+    )
+    frappe.redirect(target_url)

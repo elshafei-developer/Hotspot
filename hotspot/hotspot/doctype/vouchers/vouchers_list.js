@@ -61,15 +61,16 @@ frappe.listview_settings["Vouchers"] = {
       "Actions"
     );
     listview.page.add_inner_button("Test Print", () => {
-      // listview.refresh();
-      // window.location.href = frappe.urllib.get_full_url("hassan");
-
+      console.log(cur_list.get_checked_items(true));
       frappe.call({
         method: "hotspot.hotspot.doctype.vouchers.vouchers.test",
         args: { data: cur_list.get_checked_items(true) },
-        callback: (r) => {
-          console.log("CallBack");
-          window.location.href = frappe.urllib.get_full_url(r.message);
+        callback: function (data) {
+          const printContent = data.message;
+          const printWindow = window.open("", "_blank");
+          printWindow.document.write(printContent);
+          printWindow.document.close();
+          printWindow.print();
         },
       });
     });
@@ -77,12 +78,6 @@ frappe.listview_settings["Vouchers"] = {
 };
 
 print = (name) => {
-  // var doc = {};
-  // doc.test = "Mr. Test";
-  // let result = frappe.render_template("<h1>Hello {{ doc.test }}</h1>", {
-  //   doc: doc,
-  // });
-  // frappe.render_pdf(result, { orientation: "Portrait" });
   var print_format = "Print Vouchers";
   var w = window.open(
     frappe.urllib.get_full_url(
@@ -102,10 +97,3 @@ print = (name) => {
     return;
   }
 };
-
-// var doc = {};
-// doc.test = "Mr. Test";
-// let result = frappe.render_template("<h1>Hello {{ doc.test }}</h1>", {
-//   doc: doc,
-// });
-// frappe.render_pdf(result, { orientation: "Portrait" }); // orientation takes "Portrait" or "Landscape"

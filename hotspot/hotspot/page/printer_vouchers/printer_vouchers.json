@@ -1,0 +1,20 @@
+{
+ "content": null,
+ "creation": "2024-03-24 15:52:22.729697",
+ "docstatus": 0,
+ "doctype": "Page",
+ "icon": "",
+ "idx": 0,
+ "modified": "2024-03-25 14:10:25.221158",
+ "modified_by": "Administrator",
+ "module": "Hotspot",
+ "name": "printer-vouchers",
+ "owner": "Administrator",
+ "page_name": "printer-vouchers",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "printer voucher"
+}

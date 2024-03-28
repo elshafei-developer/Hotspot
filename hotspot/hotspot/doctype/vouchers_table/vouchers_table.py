@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class table(Document):
+class VouchersTable(Document):
 	pass

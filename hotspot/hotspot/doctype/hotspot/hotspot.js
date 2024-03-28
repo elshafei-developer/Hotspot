@@ -31,11 +31,11 @@ frappe.ui.form.on("Hotspot", {
               fieldname: "name",
               fieldtype: "Data",
             },
-            {
-              label: "Password",
-              fieldname: "password",
-              fieldtype: "Data",
-            },
+            // {
+            //   label: "Password",
+            //   fieldname: "password",
+            //   fieldtype: "password",
+            // },
           ],
           primary_action_label: "Add User",
           primary_action(data) {
@@ -70,7 +70,7 @@ frappe.ui.form.on("table", {
   name1: function (frm) {
     console.log("name1_add");
   },
-  add: (frm, cdt, cdn) => {
+  add_row: (frm, cdt, cdn) => {
     console.log("add");
   },
   password(frm, cdt, cdn) {

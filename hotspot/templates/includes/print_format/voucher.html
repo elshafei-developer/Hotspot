@@ -1,11 +1,11 @@
 <body>
   <style>
-    /* @media screen {
-      * {
-        margin: 0;
-        padding: 0;
-      }
-    } */
+    /* @media screen { */
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    /* } */
     /* @media print { */
     * {
       margin: 0;
@@ -37,7 +37,7 @@
     /* } */
   </style>
   <ul>
-    {% for item in data %}
+    {% for item in doc.vouchers_table %} {% if item.printer == 1 %}
     <li>
       <p>شركة آمال الشرق</p>
       <p>AMAL ALSHARQ</p>
@@ -46,13 +46,12 @@
           width="100%"
           height="100%"
           alt=""
-          src="https://qrcode.tec-it.com/API/QRCode?data=http%3a%2f%2famal-shark.com%2flogin%3fusername%3d{{item}}%26password%3d{{item.name}}&backcolor=%23ffffff"
+          src="https://qrcode.tec-it.com/API/QRCode?data=http%3a%2f%2famal-shark.com%2flogin%3fusername%3d{{item.name}}%26password%3d{{item.name}}&backcolor=%23ffffff"
         />
         <img />
       </div>
-      <p>{{item}}</p>
+      <p>{{item.voucher}}</p>
     </li>
-    <hr />
-    {% endfor %}
+    {% endif %} {% endfor %}
   </ul>
 </body>
