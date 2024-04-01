@@ -135,7 +135,7 @@ def connect_hotspot(method,data=None,voucher=None):
 	if method == 'PATCH':
 		return PATCH(ip,admin,password,data,voucher)
 	
-def GET(ip,admin,password,name):
+def GET(ip,admin,password,name=None):
 	if name:
 		try:
 			api = requests.request("GET",f"https://{ip}/rest/ip/hotspot/user/{name}",auth=(admin,password),verify=False)
@@ -212,8 +212,9 @@ def delete_inactive_vouchers():
 	IP = hotspot_controller.ip
 	admin = hotspot_controller.user
 	password = hotspot_controller.password
-	api = requests.request("GET",f"https://{IP}/rest/ip/hotspot/user",auth=(admin,password),verify=False)
-	all_vouchers = api.json()
+	# api = requests.request("GET",f"https://{IP}/rest/ip/hotspot/user",auth=(admin,password),verify=False)
+	# all_vouchers = api.json()
+	all_vouchers = GET(IP,admin,password)
 	all_vouchers.pop(0)
 	inactive_vouchers = list(filter(lambda x: x['disabled'] == 'true', all_vouchers))
 
@@ -238,20 +239,33 @@ def create_printer_voucher(vouchers):
 				'voucher': voucher,
 			})
 		doc.insert()
-
-		# frappe.local.response['type'] = 'redirect'
-		# frappe.local.response['location'] = f'/desk#Form/vouchers-printer/{doc.name}' # Redirect to the form with the created DocType
 		return doc.name
 
+@frappe.whitelist()
+def crete_from_vouchers(source_name, target_doc=None):
+	doclist = get_mapped_doc(
+		"Vouchers",
+		source_name,
+		{
+			"Vouchers":{
+				"doctype": "Vouchers Printer",
+			}
+		}
+		)
 
-def make_B_from_A(source_name, target_doc=None):
-   doclist = get_mapped_doc("Vouchers", source_name, {
-      "Vouchers": {
-         "doctype": "Vouchers Printer",
-         "field_map": {
-            "name1": "link_to_A_Document"
-         }
-      }
-   }, target_doc)
+	return doclist
 
-   return doclist
+
+@frappe.whitelist()
+def crete_from_controller(source_name, target_doc=None):
+	doclist = get_mapped_doc(
+		"Hotspot Controller",
+		source_name,
+		{
+			"Hotspot Controller":{
+				"doctype": "Vouchers Printer",
+			}
+		}
+		)
+
+	return doclist

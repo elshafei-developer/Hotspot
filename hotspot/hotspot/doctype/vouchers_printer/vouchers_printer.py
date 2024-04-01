@@ -2,22 +2,17 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils.pdf import get_pdf
 
 
 
 class VouchersPrinter(Document):
-	@property
-	def v_test(self):
-		return 'Virtual Field Test'
-	@frappe.whitelist()
-	def dd(self):
-		return 'dd'
-	
-
-@frappe.whitelist()	
-def delete_vouchers(name):
-	vouchers = frappe.get_doc("Vouchers Printer", name)
-	vouchers.vouchers_table = []
-	frappe.msgprint("Delete Vouchers")	
+	pass
+@frappe.whitelist()
+def delete_document(docname):
+	try:
+		frappe.delete_doc('Vouchers Printer', docname)
+		return True
+	except Exception as e:
+		frappe.throw(e)

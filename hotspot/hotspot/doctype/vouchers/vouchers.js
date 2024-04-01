@@ -6,9 +6,9 @@ frappe.ui.form.on("Vouchers", {
   },
   refresh(frm) {
     frm.add_custom_button(__("Create Printer Voucher"), () => {
-      this.frappe.model.open_mapped_doc({
-        method: "hotspot.hotspot.doctype.vouchers.vouchers.make_B_from_A",
-        frm: this.frm,
+      frappe.model.open_mapped_doc({
+        method: "hotspot.hotspot.doctype.vouchers.vouchers.crete_from_vouchers",
+        frm: frm,
       });
     });
   },

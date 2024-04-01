@@ -2,31 +2,35 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Vouchers Printer", {
-  // before_load(frm) {
-  //   frappe.db.get_doc("Vouchers Printer", frm.doc.name).then((doc) => {
-  //     console.log(doc);
-  //     console.log(doc.vouchers_table);
-  //     doc.vouchers_table = [];
-  //     console.log(doc.vouchers_table);
-  //     // frm.save();
-  //   });
-  // },
-  // onload(frm) {
-  //   frm.refresh_field("vouchers_table");
-  //   frappe.call({
-  //     method: "hotspot.hotspot.doctype.vouchers.vouchers.get_vouchers",
-  //     freeze: true,
-  //     freeze_message: "Getting All Vouchers...",
-  //     callback: function (r) {
-  //       frm.doc.vouchers_table = [];
-  //       for (let i = 0; i < r.message.length; i++) {
-  //         frm.add_child("vouchers_table", {
-  //           voucher: r.message[i].name,
-  //           uptime: r.message[i].uptime,
-  //         });
-  //       }
-  //       frm.refresh_field("vouchers_table");
-  //     },
-  //   });
-  // },
+  refresh(frm) {
+    frm.add_custom_button(__("Delete"), function () {
+      frappe.confirm(
+        "Do you want to delete this document?",
+        function () {
+          frappe.call({
+            method:
+              "hotspot.hotspot.doctype.vouchers_printer.vouchers_printer.delete_document",
+            args: {
+              docname: frm.docname,
+            },
+            freeze: true,
+            freeze_message: "Deleting...",
+            callback: function (r) {
+              console.log(r);
+              if (r.message) {
+                frappe.show_alert({
+                  message: __("Document has been deleted"),
+                  indicator: "green",
+                });
+                frappe.set_route("List", "Vouchers Printer");
+              }
+            },
+          });
+        },
+        function () {
+          return false;
+        }
+      );
+    });
+  },
 });

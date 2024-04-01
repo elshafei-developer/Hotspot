@@ -31,8 +31,9 @@ frappe.listview_settings["Vouchers"] = {
 
       // () => {
       //   frappe.model.open_mapped_doc({
-      //     method: "hotspot.hotspot.doctype.vouchers.vouchers.make_B_from_A",
-      //     frm: cur_list,
+      //     method:
+      //       "hotspot.hotspot.doctype.vouchers.vouchers.crete_from_vouchers",
+      //     listview: listview,
       //   });
       // },
 
@@ -45,6 +46,8 @@ frappe.listview_settings["Vouchers"] = {
             args: {
               vouchers: cur_list.get_checked_items(true),
             },
+            freeze: true,
+            freeze_message: "Creating Printer Vouchers...",
             callback: function (r) {
               if (r.message != false) {
                 frappe.set_route("Form", "Vouchers Printer", r.message);
