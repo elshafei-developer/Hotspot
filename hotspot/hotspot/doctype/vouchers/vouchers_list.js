@@ -28,69 +28,33 @@ frappe.listview_settings["Vouchers"] = {
     );
     listview.page.add_inner_button(
       "Create Printer Voucher",
+
+      // () => {
+      //   frappe.model.open_mapped_doc({
+      //     method: "hotspot.hotspot.doctype.vouchers.vouchers.make_B_from_A",
+      //     frm: cur_list,
+      //   });
+      // },
+
+      // Create and move
       () => {
-        let d = new frappe.ui.Dialog({
-          title: "Enter details",
-          fields: [
-            {
-              label: "Name DocType",
-              fieldname: "name_doc",
-              fieldtype: "Data",
-            },
-          ],
-          size: "small",
-          primary_action_label: "Create",
-          primary_action(values) {
-            frappe.call({
-              method:
-                "hotspot.hotspot.doctype.vouchers.vouchers.create_printer_voucher",
-              args: {
-                name: this.get_value("name_doc"),
-                vouchers: cur_list.get_checked_items(true),
-              },
-              callback: function (r) {
-                if (r.message != false) {
-                  d.hide();
-                  frappe.show_alert({
-                    message: __("Vouchers Printer Created"),
-                    indicator: "green",
-                  });
-                  frappe.confirm(
-                    __("Do You Want Move To This Vouchers Printer"),
-                    () => {
-                      frappe.set_route("Form", "Vouchers Printer", r.message);
-                    }
-                  );
-                }
-              },
-            });
-          },
-        });
         if (cur_list.get_checked_items(true).length >= 1) {
-          d.show();
+          frappe.call({
+            method:
+              "hotspot.hotspot.doctype.vouchers.vouchers.create_printer_voucher",
+            args: {
+              vouchers: cur_list.get_checked_items(true),
+            },
+            callback: function (r) {
+              if (r.message != false) {
+                frappe.set_route("Form", "Vouchers Printer", r.message);
+              }
+            },
+          });
         } else {
           frappe.throw(__("Please select vouchers to create printer voucher"));
           return;
         }
-      },
-      "Actions"
-    );
-    listview.page.add_inner_button(
-      __("Download Vouchers Printr"),
-      () => {
-        frappe.call({
-          method: "hotspot.hotspot.doctype.vouchers.vouchers.print_vouchers",
-          args: {
-            data: cur_list.get_checked_items(true),
-          },
-          callback: function (r) {
-            if (r.message) {
-              pdf = frappe.render_pdf(r.message, { orientation: "Portrait" });
-            }
-          },
-          freeze: true,
-          freeze_message: "Printing Vouchers...",
-        });
       },
       "Actions"
     );

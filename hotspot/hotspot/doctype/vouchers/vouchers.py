@@ -3,8 +3,15 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe import json
+from frappe.model.mapper import get_mapped_doc
+
 
 class Vouchers(Document):
+
+	# @frappe.whitelist()
+	# def GETT():
+	# 	frappe.throw(_(f"Error: The voucher could not be created Empty."))
+
 	def db_insert(self, *args, **kwargs):
 		insert_voucher(self.as_dict())
 		self.print_templates = 'voucher'
@@ -217,22 +224,10 @@ def delete_inactive_vouchers():
 			frappe.throw(_(f"Error: The voucher '{voucher['name']}' could not be deleted."))
 	frappe.msgprint(_(f"Vouchers Inactive deleted successfully."))
 
-@frappe.whitelist()
-def print_vouchers(data):
-	data = json.loads(data)
-	vouchers = []
-	for voucher in data:
-		v = {}
-		v['name'] = voucher
-		# v['qr_code'] = generate_qr_code(voucher)
-		vouchers.append(v)
-	response = frappe.render_template('hotspot/hotspot/doctype/vouchers/print_vouchers.html', {'data': vouchers})
-	return response
 
 @frappe.whitelist()
-def create_printer_voucher(name, vouchers):
+def create_printer_voucher(vouchers):
 	doc = frappe.new_doc('Vouchers Printer')
-	doc.name = name
 	vouchers = json.loads(vouchers)
 	if vouchers == []:
 		frappe.throw(_(f"Error: The printer could not be created Empty."))
@@ -243,4 +238,20 @@ def create_printer_voucher(name, vouchers):
 				'voucher': voucher,
 			})
 		doc.insert()
-		return name
+
+		# frappe.local.response['type'] = 'redirect'
+		# frappe.local.response['location'] = f'/desk#Form/vouchers-printer/{doc.name}' # Redirect to the form with the created DocType
+		return doc.name
+
+
+def make_B_from_A(source_name, target_doc=None):
+   doclist = get_mapped_doc("Vouchers", source_name, {
+      "Vouchers": {
+         "doctype": "Vouchers Printer",
+         "field_map": {
+            "name1": "link_to_A_Document"
+         }
+      }
+   }, target_doc)
+
+   return doclist
