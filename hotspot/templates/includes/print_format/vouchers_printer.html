@@ -39,13 +39,9 @@
       <p>شركة آمال الشرق</p>
       <p>AMAL ALSHARQ</p>
       <div class="QR">
-        <img
-          width="100%"
-          height="100%"
-          alt=""
-          src="https://qrcode.tec-it.com/API/QRCode?data=http%3a%2f%2famal-shark.com%2flogin%3fusername%3d{{item.voucher}}%26password%3d{{item.name}}&backcolor=%23ffffff"
-        />
-        <img />
+        {% set url = "http://amal.shark.com/login?username=" + item.voucher +
+        "&password=" + item.voucher %}
+        <img src="{{get_qr_code(url)}}" alt="{{item.voucher}}" />
       </div>
       <p>{{item.voucher}}</p>
     </li>

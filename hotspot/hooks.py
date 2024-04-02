@@ -59,10 +59,10 @@ app_license = "mit"
 # ----------
 
 # add methods and filters to jinja environment
-# jinja = {
-# 	"methods": "hotspot.utils.jinja_methods",
-# 	"filters": "hotspot.utils.jinja_filters"
-# }
+jinja = {
+	"methods": "hotspot.hotspot.utils.qr_generator.get_qr_code",
+	# "filters": "hotspot.utils.jinja_filters"
+}
 
 # Installation
 # ------------
