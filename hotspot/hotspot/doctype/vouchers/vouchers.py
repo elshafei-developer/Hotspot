@@ -8,10 +8,6 @@ from frappe.model.mapper import get_mapped_doc
 
 class Vouchers(Document):
 
-	# @frappe.whitelist()
-	# def GETT():
-	# 	frappe.throw(_(f"Error: The voucher could not be created Empty."))
-
 	def db_insert(self, *args, **kwargs):
 		insert_voucher(self.as_dict())
 		self.print_templates = 'voucher'
@@ -22,6 +18,7 @@ class Vouchers(Document):
 
 	def update(self, *args, **kwargs):
 		return super().update(*args)
+	
 	def delete(args):
 		delete_voucher(args.name)
 
@@ -57,6 +54,7 @@ def get_vouchers():
 							'status': 'Active' if v['disabled'] == 'false' else 'Inactive',
 							'uptime': v['uptime'],
 							'limit_uptime': extract_time(v['limit-uptime']) if 'limit-uptime' in v else None,
+							'routes': v['routes'] if 'routes' in v else None
 							}
 		vouchers_map = list(map(data_map, vouchers))
 	return vouchers_map
@@ -96,6 +94,7 @@ def voucher_structure(data):
 	return {
 		"name": data['name1'].replace(' ','_'),
 		'disabled': 'false' if data['status'] == 'Active' else 'true',
+		'routes':"amall" if data['routes'] == None else data['routes'],
 		'limit-uptime':  '00:00:00' if data['limit_uptime'] == None else data['limit_uptime'],
 	}
 
@@ -208,21 +207,13 @@ def PATCH(ip,admin,password,data,voucher):
 # ## ACTION ## #
 @frappe.whitelist()
 def delete_inactive_vouchers():
-	hotspot_controller = frappe.get_doc('Hotspot Controller')
-	IP = hotspot_controller.ip
-	admin = hotspot_controller.user
-	password = hotspot_controller.password
-	# api = requests.request("GET",f"https://{IP}/rest/ip/hotspot/user",auth=(admin,password),verify=False)
-	# all_vouchers = api.json()
-	all_vouchers = GET(IP,admin,password)
+	all_vouchers = connect_hotspot("GET")
 	all_vouchers.pop(0)
 	inactive_vouchers = list(filter(lambda x: x['disabled'] == 'true', all_vouchers))
 
 	for voucher in inactive_vouchers:
-		try:
-			requests.request("DELETE",f"https://{IP}/rest/ip/hotspot/user/{voucher['name']}",auth=(admin,password),verify=False)
-		except:
-			frappe.throw(_(f"Error: The voucher '{voucher['name']}' could not be deleted."))
+		connect_hotspot("DELETE",voucher['name'])
+	
 	frappe.msgprint(_(f"Vouchers Inactive deleted successfully."))
 
 
@@ -230,8 +221,8 @@ def delete_inactive_vouchers():
 def create_printer_voucher(vouchers):
 	doc = frappe.new_doc('Vouchers Printer')
 	vouchers = json.loads(vouchers)
-	if vouchers == []:
-		frappe.throw(_(f"Error: The printer could not be created Empty."))
+	if type(vouchers) != list:
+		frappe.throw(_(f"ERROR => Type Data is Not Array"))
 		return False
 	else:
 		for voucher in list(vouchers):

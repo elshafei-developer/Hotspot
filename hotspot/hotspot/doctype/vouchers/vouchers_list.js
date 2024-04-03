@@ -1,6 +1,33 @@
 frappe.listview_settings["Vouchers"] = {
   onload: function (listview) {
     listview.page.add_inner_button(
+      "Create Printer Voucher",
+      () => {
+        if (cur_list.get_checked_items(true).length >= 1) {
+          frappe.call({
+            method:
+              "hotspot.hotspot.doctype.vouchers.vouchers.create_printer_voucher",
+            args: {
+              vouchers: cur_list.get_checked_items(true),
+            },
+            freeze: true,
+            freeze_message: "Creating Printer Vouchers...",
+            callback: function (r) {
+              if (r.message != false) {
+                frappe.set_route("Form", "Vouchers Printer", r.message);
+              } else {
+                frappe.throw(`ERROR => ${r.massage}`);
+              }
+            },
+          });
+        } else {
+          frappe.throw(__("Please select vouchers to create printer voucher"));
+          return;
+        }
+      },
+      "Actions"
+    );
+    listview.page.add_inner_button(
       __("Delete Inactive Vouchers"),
       () => {
         frappe.confirm(
@@ -23,41 +50,6 @@ frappe.listview_settings["Vouchers"] = {
               });
           }
         );
-      },
-      "Actions"
-    );
-    listview.page.add_inner_button(
-      "Create Printer Voucher",
-
-      // () => {
-      //   frappe.model.open_mapped_doc({
-      //     method:
-      //       "hotspot.hotspot.doctype.vouchers.vouchers.crete_from_vouchers",
-      //     listview: listview,
-      //   });
-      // },
-
-      // Create and move
-      () => {
-        if (cur_list.get_checked_items(true).length >= 1) {
-          frappe.call({
-            method:
-              "hotspot.hotspot.doctype.vouchers.vouchers.create_printer_voucher",
-            args: {
-              vouchers: cur_list.get_checked_items(true),
-            },
-            freeze: true,
-            freeze_message: "Creating Printer Vouchers...",
-            callback: function (r) {
-              if (r.message != false) {
-                frappe.set_route("Form", "Vouchers Printer", r.message);
-              }
-            },
-          });
-        } else {
-          frappe.throw(__("Please select vouchers to create printer voucher"));
-          return;
-        }
       },
       "Actions"
     );

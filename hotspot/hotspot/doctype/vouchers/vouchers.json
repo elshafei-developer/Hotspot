@@ -12,7 +12,7 @@
   "column_break_qhyg",
   "uptime",
   "limit_uptime",
-  "barcode"
+  "routes"
  ],
  "fields": [
   {
@@ -66,15 +66,16 @@
    "options": "false\ntrue"
   },
   {
-   "fieldname": "barcode",
-   "fieldtype": "Barcode",
-   "label": "barcode"
+   "fieldname": "routes",
+   "fieldtype": "Link",
+   "label": "Routers",
+   "options": "Company"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2024-03-18 13:46:20.874704",
+ "modified": "2024-04-03 15:17:41.737390",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers",
