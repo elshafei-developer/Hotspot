@@ -3,46 +3,50 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe import json
-from frappe.model.mapper import get_mapped_doc
+# from frappe.model.mapper import get_mapped_doc
 
 
 class Vouchers(Document):
 
-	def db_insert(self, *args, **kwargs):
-		insert_voucher(self.as_dict())
-		self.print_templates = 'voucher'
+    def db_insert(self, *args, **kwargs):
+        insert_voucher(self.as_dict())
+        # self.print_templates = 'voucher'
 
-	def db_update(self, *args, **kwargs):
-		update_voucher(self.name, self.as_dict())
-		self.modified = False
+    def db_update(self, *args, **kwargs):
+        frappe.throw(_(f"Error: Can not Update From Here."))
+        update_voucher(self.name, self.as_dict())
+        self.modified = False
 
-	def update(self, *args, **kwargs):
-		return super().update(*args)
+    def update(self, *args, **kwargs):
+        return super().update(*args)
 	
-	def delete(args):
-		delete_voucher(args.name)
+    def before_rename(self, old, new, merge=False):
+        frappe.throw(_(f"Error: Can not Rename From Here."))
 
-	def load_from_db(self):
-		self.modified = False
-		voucher = get_voucher(self.name)
-		super(Document, self).__init__(voucher)
-	
-	@staticmethod
-	def get_list(self, *args, **kwargs):
-		vouchers = get_vouchers()
-		return vouchers
+    def delete(args):
+        delete_voucher(args.name)
 
-	@staticmethod
-	def get_count(args):
-		pass	
-	@staticmethod
-	def get_stats(args):
-		pass
+    def load_from_db(self):
+        self.modified = False
+        voucher = get_voucher(self.name)
+        super(Document, self).__init__(voucher)
 
-	def print(args):
-		frappe.throw(_(f"Error: The voucher could not be printed."))
+    @staticmethod
+    def get_list(args):
+        vouchers = get_vouchers()
+        if args.get('as_list'):
+            return [tuple(voucher.values()) for voucher in vouchers]
+        return vouchers
 
-# FUNCTIONS
+    @staticmethod
+    def get_count(args):
+        return len(get_vouchers())	
+    @staticmethod
+    def get_stats(args):
+        pass
+
+
+### FUNCTIONS ###
 @frappe.whitelist()
 def get_vouchers():
 	vouchers = connect_hotspot('GET')
@@ -54,7 +58,7 @@ def get_vouchers():
 							'status': 'Active' if v['disabled'] == 'false' else 'Inactive',
 							'uptime': v['uptime'],
 							'limit_uptime': extract_time(v['limit-uptime']) if 'limit-uptime' in v else None,
-							'routes': v['routes'] if 'routes' in v else None
+							'server': v['server'] if 'server' in v else 'all'
 							}
 		vouchers_map = list(map(data_map, vouchers))
 	return vouchers_map
@@ -94,8 +98,8 @@ def voucher_structure(data):
 	return {
 		"name": data['name1'].replace(' ','_'),
 		'disabled': 'false' if data['status'] == 'Active' else 'true',
-		'routes':"amall" if data['routes'] == None else data['routes'],
-		'limit-uptime':  '00:00:00' if data['limit_uptime'] == None else data['limit_uptime'],
+		'server':data['server'] if data['server'] else 'all',
+		'limit-uptime':  data['limit_uptime'] if data['limit_uptime'] else '00:00:00',
 	}
 
 def extract_time(time_str):
@@ -118,7 +122,7 @@ def extract_time(time_str):
     formatted_time = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
     return formatted_time
 
-# REST API
+### REST API ###
 def connect_hotspot(method,data=None,voucher=None):
 	hotspot_controller = frappe.get_doc('Hotspot Controller')
 	ip = hotspot_controller.ip
@@ -203,8 +207,7 @@ def PATCH(ip,admin,password,data,voucher):
 		return False
 
 
-
-# ## ACTION ## #
+### ACTION ###
 @frappe.whitelist()
 def delete_inactive_vouchers():
 	all_vouchers = connect_hotspot("GET")
@@ -232,31 +235,15 @@ def create_printer_voucher(vouchers):
 		doc.insert()
 		return doc.name
 
-@frappe.whitelist()
-def crete_from_vouchers(source_name, target_doc=None):
-	doclist = get_mapped_doc(
-		"Vouchers",
-		source_name,
-		{
-			"Vouchers":{
-				"doctype": "Vouchers Printer",
-			}
-		}
-		)
-
-	return doclist
-
-
-@frappe.whitelist()
-def crete_from_controller(source_name, target_doc=None):
-	doclist = get_mapped_doc(
-		"Hotspot Controller",
-		source_name,
-		{
-			"Hotspot Controller":{
-				"doctype": "Vouchers Printer",
-			}
-		}
-		)
-
-	return doclist
+# @frappe.whitelist()
+# def crete_from_vouchers(source_name, target_doc=None):
+# 	doclist = get_mapped_doc(
+# 		"Vouchers",
+# 		source_name,
+# 		{
+# 			"Vouchers":{
+# 				"doctype": "Vouchers Printer",
+# 			}
+# 		}
+# 		)
+# 	return doclist
