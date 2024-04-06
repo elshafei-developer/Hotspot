@@ -52,12 +52,19 @@ def get_vouchers():
 	if vouchers == False:
 		frappe.throw(_(f"Error: The hotspot controller is disconnected."))
 	else:
+		hotspot_controller = frappe.get_doc('Hotspot Controller')
+        # for voucher in vouchers:
+        #     for hotspot_table in hotspot_controller.hotspot_table:
+        #         if hotspot_table.server == voucher['server']:
+        #             voucher['url'] = hotspot_table.url
+        #             voucher['company'] = hotspot_table.name1
 		vouchers.pop(0)
 		data_map = lambda v: {'name': v['name'],
 							'status': 'Active' if v['disabled'] == 'false' else 'Inactive',
 							'uptime': v['uptime'],
 							'limit_uptime': extract_time(v['limit-uptime']) if 'limit-uptime' in v else None,
-							'server': v['server'] if 'server' in v else 'all'
+							'server': v['server'] if 'server' in v else 'all',
+							'company': hotspot_controller.get_company(v['server']) if 'server' in v else 'الكل'  ,
 							}
 		vouchers_map = list(map(data_map, vouchers))
 	return vouchers_map
@@ -69,8 +76,7 @@ def get_voucher(voucher):
 	info_voucher['status'] = 'Active' if info_voucher['disabled'] == 'false' else 'Inactive'
 	info_voucher['limit_uptime'] = extract_time(info_voucher['limit-uptime']) if 'limit-uptime' in info_voucher else None
 	info_voucher['server'] = info_voucher['server'] if 'server' in info_voucher else 'all'
-	# if 'limit-uptime' in info_voucher:
-		# info_voucher['limit_uptime'] = extract_time(info_voucher['limit-uptime'])
+	info_voucher['company'] = frappe.get_doc('Hotspot Controller').get_company(info_voucher['server']) if 'server' in info_voucher else 'الكل'
 	return info_voucher
 	
 def insert_voucher(data):
@@ -240,7 +246,7 @@ def create_printer_voucher(vouchers):
 				'voucher': info_voucher['name1'],
 				'server': info_voucher['server'],
 				'url': info_voucher['url'] if 'url' in info_voucher  else 'http://localhost',
-				'name_company': info_voucher['name_company'] if 'name_company' in info_voucher else 'All',
+				'name_company': info_voucher['name_company'] if 'name_company' in info_voucher else 'الكل',
 			})
 		doc.insert()
 		return doc.name

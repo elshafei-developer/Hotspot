@@ -19,9 +19,13 @@ class ServerHotspot(Document):
         delete_server(args.name)
 	
     def load_from_db(self):
-        self.modified = False
+        # hotspot_controller = frappe.get_doc('Hotspot Controller')
+        # name = hotspot_controller.get_server(self.name)
+        # self.name = name
+        # frappe.msgprint(name)
         server = get_server(self.name)
         super(Document, self).__init__(server)
+        self.modified = False
 
     @staticmethod
     def get_list(args):
@@ -44,10 +48,14 @@ def get_servers():
 	if servers == False:
 		frappe.throw(_(f"Error: The hotspot controller is disconnected."))
 	else:
+		hotspot_controller = frappe.get_doc('Hotspot Controller')
 		data_map = lambda s: {
-                            'name': s['name'],
+                            # 'name':  hotspot_controller.get_company(s['name']),
+                            'name':  s['name'],
+							'company':  hotspot_controller.get_company(s['name']),
                             'status': 'Active' if s['disabled'] == 'false' else 'Inactive',
                             'interface': s['interface'],
+                            # 'server': s['name'],
                             }
 		servers_map = list(map(data_map, servers))
 	return servers_map
@@ -55,8 +63,9 @@ def get_servers():
 def get_server(server):
     response  = connect_hotspot('GET',server)
     info_server = response
-    info_server['name1'] = info_server['name']
+    info_server['server'] = info_server['name']
     info_server['status'] = 'Active' if info_server['disabled'] == 'false' else 'Inactive'
+    info_server['company'] = frappe.get_doc('Hotspot Controller').get_company(info_server['name'])
     return info_server
 
 def insert_server(data):
@@ -73,7 +82,7 @@ def delete_server(server):
 # structure of server that MikroTik Accept
 def server_structure(data):
 	return {
-		"name": data['name1'].replace(' ','_'),
+		"name": data['server'].replace(' ','_'),
 		'disabled': 'false' if data['status'] == 'Active' else 'true',
 		'interface': data['interface'],
 	}

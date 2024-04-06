@@ -8,11 +8,13 @@
  "field_order": [
   "name1",
   "status",
-  "disabled",
-  "column_break_qhyg",
-  "uptime",
   "limit_uptime",
-  "server"
+  "column_break_qhyg",
+  "company",
+  "server",
+  "uptime",
+  "section_break_posp",
+  "disabled"
  ],
  "fields": [
   {
@@ -70,12 +72,23 @@
    "fieldtype": "Link",
    "label": "Server",
    "options": "Server Hotspot"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_posp",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2024-04-04 16:28:22.210537",
+ "modified": "2024-04-06 15:29:00.162292",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers",

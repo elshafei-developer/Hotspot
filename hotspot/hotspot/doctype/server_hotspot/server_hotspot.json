@@ -6,9 +6,10 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "name1",
+  "server",
   "status",
   "column_break_meun",
+  "company",
   "interface"
  ],
  "fields": [
@@ -33,15 +34,22 @@
    "unique": 1
   },
   {
-   "fieldname": "name1",
+   "fieldname": "company",
    "fieldtype": "Data",
-   "label": "Name"
+   "in_list_view": 1,
+   "label": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "server",
+   "fieldtype": "Data",
+   "label": "Server"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2024-04-04 17:47:51.979785",
+ "modified": "2024-04-06 15:26:44.370795",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Server Hotspot",
