@@ -12,25 +12,11 @@ class ServerHotspot(Document):
         insert_server(self.as_dict())
 		
     def db_update(self, *args, **kwargs):
-		# TODO @hassanelsahfei: This is a bug, this method not work ?!
-        frappe.throw(_(f"Error: Can not Update From Here."))
-        # update_server(self.name, self.as_dict())
-        # self.modified = False
-		
-    def update(self, *args, **kwargs):
-        return super().update(*args)
-		
-    def before_rename(self, old, new, merge=False):
-        frappe.throw(_(f"Error: Can not Rename From Here."))
+        update_server(self.name, self.as_dict())
+        self.modified = False
 			
-    def delete(self, *args, **kwargs):
-        pass
-
-    def load_from_db(self):
-        pass
-
-    def db_update(self):
-        pass
+    def delete(args):
+        delete_server(args.name)
 	
     def load_from_db(self):
         self.modified = False
@@ -81,6 +67,9 @@ def update_server(server,data):
 	data = server_structure(data)
 	connect_hotspot('PATCH',data,server)
 
+def delete_server(server):
+	connect_hotspot("DELETE",server)
+
 # structure of server that MikroTik Accept
 def server_structure(data):
 	return {
@@ -100,8 +89,8 @@ def connect_hotspot(method,data=None,server=None):
 		return GET(ip,admin,password,data)
 	if method == 'PUT':
 		return PUT(ip,admin,password,data)
-	# if method == 'DELETE':
-	# 	return DELETE(ip,admin,password,data)
+	if method == 'DELETE':
+		return DELETE(ip,admin,password,data)
 	if method == 'PATCH':
 		return PATCH(ip,admin,password,data,server)
 	
@@ -132,7 +121,7 @@ def GET(ip,admin,password,name=None):
 def PUT(ip,admin,password,data):
 	if data == None:
 		frappe.throw(_(f"Error: The Server could not be created Empty."))
-	# voucher_exists(data['name'])
+	# server_exists(data['name'])
 	try:
 		api = requests.request("PUT",f"https://{ip}/rest/ip/hotspot",auth=(admin,password),json=data,verify=False)
 		if api.status_code == 201:
@@ -144,24 +133,24 @@ def PUT(ip,admin,password,data):
 		frappe.throw(_(f"Error: => {e}"))
 		return False
 
-# def DELETE(ip,admin,password,voucher):
-# 	if voucher == None:
-# 		frappe.throw(_(f"Error: A name Voucher must be given to delete the Voucher"))
-# 	try:
-# 		api = requests.request("DELETE",f"https://{ip}/rest/ip/hotspot/user/{voucher}",auth=(admin,password),verify=False)
-# 		if api.status_code == 204:
-# 			return True
-# 		else:
-# 			frappe.throw(_(f"Error: {api.status_code}"))
-# 			return False
-# 	except requests.exceptions.RequestException as e:
-# 		frappe.throw(_(f"Error: => {e}"))
-# 		return False
+def DELETE(ip,admin,password,server):
+	if server == None:
+		frappe.throw(_(f"Error: A name server must be given to delete the server"))
+	try:
+		api = requests.request("DELETE",f"https://{ip}/rest/ip/hotspot/{server}",auth=(admin,password),verify=False)
+		if api.status_code == 204:
+			return True
+		else:
+			frappe.throw(_(f"Error: {api.status_code}"))
+			return False
+	except requests.exceptions.RequestException as e:
+		frappe.throw(_(f"Error: => {e}"))
+		return False
 	
 def PATCH(ip,admin,password,data,server):
 	if server == None:
 		frappe.throw(_(f"Error: A name must be given to Update the Voucher"))
-	# voucher_exists(data['name'],voucher)
+	# server_exists(data['name'],voucher)
 	try:
 		api = requests.request("PATCH",f"https://{ip}/rest/ip/hotspot/{server}",auth=(admin,password),verify=False,json=data)
 		if api.status_code == 200:

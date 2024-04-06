@@ -13,7 +13,6 @@ class Vouchers(Document):
         # self.print_templates = 'voucher'
 
     def db_update(self, *args, **kwargs):
-        frappe.throw(_(f"Error: Can not Update From Here."))
         update_voucher(self.name, self.as_dict())
         self.modified = False
 
@@ -68,8 +67,10 @@ def get_voucher(voucher):
 	info_voucher = response
 	info_voucher['name1'] = info_voucher['name']
 	info_voucher['status'] = 'Active' if info_voucher['disabled'] == 'false' else 'Inactive'
-	if 'limit-uptime' in info_voucher:
-		info_voucher['limit_uptime'] = extract_time(info_voucher['limit-uptime'])
+	info_voucher['limit_uptime'] = extract_time(info_voucher['limit-uptime']) if 'limit-uptime' in info_voucher else None
+	info_voucher['server'] = info_voucher['server'] if 'server' in info_voucher else 'all'
+	# if 'limit-uptime' in info_voucher:
+		# info_voucher['limit_uptime'] = extract_time(info_voucher['limit-uptime'])
 	return info_voucher
 	
 def insert_voucher(data):
@@ -228,9 +229,18 @@ def create_printer_voucher(vouchers):
 		frappe.throw(_(f"ERROR => Type Data is Not Array"))
 		return False
 	else:
+		hotspot_controller = frappe.get_doc('Hotspot Controller')
 		for voucher in list(vouchers):
+			info_voucher = get_voucher(voucher)
+			for hotspot_table in hotspot_controller.hotspot_table:
+				if hotspot_table.server == info_voucher['server']:
+					info_voucher['url'] = hotspot_table.url
+					info_voucher['name_company'] = hotspot_table.name1
 			doc.append('vouchers_table', {
-				'voucher': voucher,
+				'voucher': info_voucher['name1'],
+				'server': info_voucher['server'],
+				'url': info_voucher['url'] if 'url' in info_voucher  else 'http://localhost',
+				'name_company': info_voucher['name_company'] if 'name_company' in info_voucher else 'All',
 			})
 		doc.insert()
 		return doc.name

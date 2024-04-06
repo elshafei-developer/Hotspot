@@ -9,7 +9,8 @@
       padding: 0;
       list-style-type: none;
     }
-    p {
+    p.name_company {
+      font-size: 16px;
       font-weight: bold;
       margin: 0 !important;
     }
@@ -28,7 +29,6 @@
       justify-content: center;
     }
     .QR {
-      margin: 5px;
       width: 120px;
       height: 120px;
     }
@@ -36,11 +36,10 @@
   <ul>
     {% for item in doc.vouchers_table %}
     <li>
-      <p>شركة آمال الشرق</p>
-      <p>AMAL ALSHARQ</p>
+      <p class="name_company">{{item.name_company}}</p>
       <div class="QR">
-        {% set url = "http://amal.shark.com/login?username=" + item.voucher +
-        "&password=" + item.voucher %}
+        {% set url = item.url + "/login?username=" + item.voucher + "&password="
+        + item.voucher %}
         <img src="{{get_qr_code(url)}}" alt="{{item.voucher}}" />
       </div>
       <p>{{item.voucher}}</p>
