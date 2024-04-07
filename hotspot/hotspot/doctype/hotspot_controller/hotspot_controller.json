@@ -5,11 +5,13 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "section_break_mcye",
   "ip",
-  "user",
   "password",
-  "column_break_ifxp",
-  "hotspot_table"
+  "column_break_tubs",
+  "user",
+  "section_break_jkbe",
+  "hotspot_servers"
  ],
  "fields": [
   {
@@ -28,20 +30,28 @@
    "label": "Password"
   },
   {
-   "fieldname": "column_break_ifxp",
-   "fieldtype": "Column Break"
+   "fieldname": "section_break_jkbe",
+   "fieldtype": "Section Break"
   },
   {
-   "fieldname": "hotspot_table",
+   "fieldname": "hotspot_servers",
    "fieldtype": "Table",
-   "label": "Hotspot Table",
+   "label": "Hotspot Servers",
    "options": "Hotspot Table"
+  },
+  {
+   "fieldname": "section_break_mcye",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_tubs",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-28 16:45:43.292433",
+ "modified": "2024-04-07 14:19:35.822407",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Hotspot Controller",

@@ -36,10 +36,9 @@
   <ul>
     {% for item in doc.vouchers_table %}
     <li>
-      <p class="name_company">{{item.name_company}}</p>
+      <p class="name_company">{{item.server}}</p>
       <div class="QR">
-        {% set url = item.url + "/login?username=" + item.voucher + "&password="
-        + item.voucher %}
+        {% set url = item.url + "/login?username=" + item.voucher %}
         <img src="{{get_qr_code(url)}}" alt="{{item.voucher}}" />
       </div>
       <p>{{item.voucher}}</p>

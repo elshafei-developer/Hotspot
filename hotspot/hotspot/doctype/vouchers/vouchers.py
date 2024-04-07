@@ -7,10 +7,8 @@ from frappe import json
 
 
 class Vouchers(Document):
-
     def db_insert(self, *args, **kwargs):
         insert_voucher(self.as_dict())
-        # self.print_templates = 'voucher'
 
     def db_update(self, *args, **kwargs):
         update_voucher(self.name, self.as_dict())
@@ -43,7 +41,8 @@ class Vouchers(Document):
     @staticmethod
     def get_stats(args):
         pass
-
+	
+   
 
 ### FUNCTIONS ###
 @frappe.whitelist()
@@ -53,18 +52,14 @@ def get_vouchers():
 		frappe.throw(_(f"Error: The hotspot controller is disconnected."))
 	else:
 		hotspot_controller = frappe.get_doc('Hotspot Controller')
-        # for voucher in vouchers:
-        #     for hotspot_table in hotspot_controller.hotspot_table:
-        #         if hotspot_table.server == voucher['server']:
-        #             voucher['url'] = hotspot_table.url
-        #             voucher['company'] = hotspot_table.name1
 		vouchers.pop(0)
 		data_map = lambda v: {'name': v['name'],
 							'status': 'Active' if v['disabled'] == 'false' else 'Inactive',
 							'uptime': v['uptime'],
 							'limit_uptime': extract_time(v['limit-uptime']) if 'limit-uptime' in v else None,
-							'server': v['server'] if 'server' in v else 'all',
-							'company': hotspot_controller.get_company(v['server']) if 'server' in v else 'الكل'  ,
+							'server_name': v['server'] if 'server' in v else 'all',
+                            'server': hotspot_controller.get_name(v['server']) if 'server' in v else 'الكل',
+							'url': hotspot_controller.get_server_url(v['server']) if 'server' in v else 'http://localhost',
 							}
 		vouchers_map = list(map(data_map, vouchers))
 	return vouchers_map
@@ -75,8 +70,7 @@ def get_voucher(voucher):
 	info_voucher['name1'] = info_voucher['name']
 	info_voucher['status'] = 'Active' if info_voucher['disabled'] == 'false' else 'Inactive'
 	info_voucher['limit_uptime'] = extract_time(info_voucher['limit-uptime']) if 'limit-uptime' in info_voucher else None
-	info_voucher['server'] = info_voucher['server'] if 'server' in info_voucher else 'all'
-	info_voucher['company'] = frappe.get_doc('Hotspot Controller').get_company(info_voucher['server']) if 'server' in info_voucher else 'الكل'
+	info_voucher['server'] = frappe.get_doc('Hotspot Controller').get_name(info_voucher['server']) if 'server' in info_voucher else 'الكل'
 	return info_voucher
 	
 def insert_voucher(data):
@@ -90,8 +84,6 @@ def update_voucher(voucher,data):
 def delete_voucher(voucher):
 	connect_hotspot('DELETE',voucher)
 
-
-
 def voucher_exists(new_name,old_name=None):
 	vouchers = connect_hotspot('GET')
 	vouchers_exists = list(map(lambda x: x['name'], vouchers))
@@ -102,10 +94,11 @@ def voucher_exists(new_name,old_name=None):
 
 # structure of voucher that MikroTik Accept
 def voucher_structure(data):
+	hotspot_controller = frappe.get_doc('Hotspot Controller')
 	return {
 		"name": data['name1'].replace(' ','_'),
 		'disabled': 'false' if data['status'] == 'Active' else 'true',
-		'server':data['server'] if data['server'] else 'all',
+		'server': hotspot_controller.get_server(data['server']) if data['server'] != 'الكل' else 'all',
 		'limit-uptime':  data['limit_uptime'] if data['limit_uptime'] else '00:00:00',
 	}
 
@@ -223,7 +216,6 @@ def delete_inactive_vouchers():
 
 	for voucher in inactive_vouchers:
 		connect_hotspot("DELETE",voucher['name'])
-	
 	frappe.msgprint(_(f"Vouchers Inactive deleted successfully."))
 
 
@@ -235,18 +227,11 @@ def create_printer_voucher(vouchers):
 		frappe.throw(_(f"ERROR => Type Data is Not Array"))
 		return False
 	else:
-		hotspot_controller = frappe.get_doc('Hotspot Controller')
 		for voucher in list(vouchers):
-			info_voucher = get_voucher(voucher)
-			for hotspot_table in hotspot_controller.hotspot_table:
-				if hotspot_table.server == info_voucher['server']:
-					info_voucher['url'] = hotspot_table.url
-					info_voucher['name_company'] = hotspot_table.name1
 			doc.append('vouchers_table', {
-				'voucher': info_voucher['name1'],
-				'server': info_voucher['server'],
-				'url': info_voucher['url'] if 'url' in info_voucher  else 'http://localhost',
-				'name_company': info_voucher['name_company'] if 'name_company' in info_voucher else 'الكل',
+				'voucher': voucher['name'],
+				'server': voucher['server'],
+				'url': voucher['url'],
 			})
 		doc.insert()
 		return doc.name

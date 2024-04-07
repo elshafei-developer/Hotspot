@@ -6,11 +6,23 @@ from frappe.model.document import Document
 
 
 class HotspotController(Document):
-    def get_company(self,server):
-        for hotspot_table in self.hotspot_table:
-            if hotspot_table.server == server:
-                return hotspot_table.name1
-    def get_server(self,company):
-        for hotspot_table in self.hotspot_table:
-            if hotspot_table.name1 == company:
-                return hotspot_table.server
+    def get_name(self,server):
+        for hotspot_servers in self.hotspot_servers:
+            if hotspot_servers.server == server:
+                return hotspot_servers.name1
+    def get_server(self,name):
+        for hotspot_servers in self.hotspot_servers:
+            if hotspot_servers.name1 == name:
+                return hotspot_servers.server
+    def get_server_url(self,server):
+        for hotspot_servers in self.hotspot_servers:
+            if hotspot_servers.server == server:
+                return hotspot_servers.url
+
+@frappe.whitelist()
+def get_servers():
+    hotspot_controller = frappe.get_doc('Hotspot Controller')
+    servers = ['الكل']
+    for hotspot_servers in hotspot_controller.hotspot_servers:
+        servers.append(hotspot_servers.name1)
+    return servers

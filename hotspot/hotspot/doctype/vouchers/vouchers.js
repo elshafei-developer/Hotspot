@@ -4,18 +4,14 @@ frappe.ui.form.on("Vouchers", {
     frappe.set_route("Form", "Vouchers", name1);
     frm.set_value("name1", frm.doc.name);
     frm.refresh();
-    // frm.refresh_field("company");
   },
   refresh(frm) {
-    frm.refresh_field("company");
-    console.log(frm.doc.company);
+    frappe
+      .call(
+        "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_servers"
+      )
+      .then((r) => {
+        set_field_options("server", r.message);
+      });
   },
-  //   refresh(frm) {
-  //     frm.add_custom_button(__("Create Printer Voucher"), () => {
-  //       frappe.model.open_mapped_doc({
-  //         method: "hotspot.hotspot.doctype.vouchers.vouchers.crete_from_vouchers",
-  //         frm: frm,
-  //       });
-  //     });
-  //   },
 });

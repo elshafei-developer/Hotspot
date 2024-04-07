@@ -4,11 +4,15 @@ frappe.listview_settings["Vouchers"] = {
       "Create Printer Voucher",
       () => {
         if (cur_list.get_checked_items(true).length >= 1) {
+          vouchers = cur_list.data.filter((voucher) => {
+            return cur_list.get_checked_items(true).includes(voucher.name);
+          });
+          console.log(vouchers);
           frappe.call({
             method:
               "hotspot.hotspot.doctype.vouchers.vouchers.create_printer_voucher",
             args: {
-              vouchers: cur_list.get_checked_items(true),
+              vouchers: vouchers,
             },
             freeze: true,
             freeze_message: "Creating Printer Vouchers...",

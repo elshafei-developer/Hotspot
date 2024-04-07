@@ -10,7 +10,7 @@
   "voucher",
   "server",
   "url",
-  "name_company"
+  "company"
  ],
  "fields": [
   {
@@ -32,16 +32,16 @@
    "label": "URL"
   },
   {
-   "fieldname": "name_company",
+   "fieldname": "company",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Name Company"
+   "label": "Company"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-04-06 12:50:40.505721",
+ "modified": "2024-04-06 17:07:21.777489",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers Table",
