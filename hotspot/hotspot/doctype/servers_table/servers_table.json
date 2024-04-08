@@ -7,8 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "name1",
-  "url",
-  "server"
+  "server",
+  "url"
  ],
  "fields": [
   {
@@ -33,10 +33,10 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-04-06 13:36:54.055424",
+ "modified": "2024-04-07 17:31:02.812971",
  "modified_by": "Administrator",
  "module": "Hotspot",
- "name": "Hotspot Table",
+ "name": "Servers Table",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

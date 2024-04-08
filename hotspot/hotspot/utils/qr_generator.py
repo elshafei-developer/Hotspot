@@ -12,11 +12,21 @@ def add_file_info(data: str) -> str:
 	return f"data:image/png;base64, {data}"
 
 def get_qr_code_bytes(data, format: str) -> bytes:
-	img = qrcode.make(data)
-	buffered = BytesIO()
-	img.save(buffered, format=format)
+    # Create QR code instance with border=0
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=0  # Set border to 0 to remove padding and margin
+    )
+    qr.add_data(data)
+    qr.make()
 
-	return buffered.getvalue()
+    img = qr.make_image(fill_color="black", back_color="white")
+    buffered = BytesIO()
+    img.save(buffered, format=format)
+
+    return buffered.getvalue()
 
 def bytes_to_base64_string(data: bytes) -> str:
 	return b64encode(data).decode("utf-8")

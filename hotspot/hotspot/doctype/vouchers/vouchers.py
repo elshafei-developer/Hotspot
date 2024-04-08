@@ -30,6 +30,8 @@ class Vouchers(Document):
 
     @staticmethod
     def get_list(args):
+        print(args.filters)
+        print('\n\n\n')
         vouchers = get_vouchers()
         if args.get('as_list'):
             return [tuple(voucher.values()) for voucher in vouchers]
@@ -37,12 +39,13 @@ class Vouchers(Document):
 
     @staticmethod
     def get_count(args):
-        return len(get_vouchers())	
+        return '👌'
+        # return len(get_vouchers())
+        # pass
     @staticmethod
     def get_stats(args):
         pass
-	
-   
+
 
 ### FUNCTIONS ###
 @frappe.whitelist()
@@ -51,13 +54,13 @@ def get_vouchers():
 	if vouchers == False:
 		frappe.throw(_(f"Error: The hotspot controller is disconnected."))
 	else:
-		hotspot_controller = frappe.get_doc('Hotspot Controller')
 		vouchers.pop(0)
-		data_map = lambda v: {'name': v['name'],
+		hotspot_controller = frappe.get_doc('Hotspot Controller')
+		data_map = lambda v: {'name':v['name'],
 							'status': 'Active' if v['disabled'] == 'false' else 'Inactive',
 							'uptime': v['uptime'],
 							'limit_uptime': extract_time(v['limit-uptime']) if 'limit-uptime' in v else None,
-							'server_name': v['server'] if 'server' in v else 'all',
+							# 'server_name': v['server'] if 'server' in v else 'all',
                             'server': hotspot_controller.get_name(v['server']) if 'server' in v else 'الكل',
 							'url': hotspot_controller.get_server_url(v['server']) if 'server' in v else 'http://localhost',
 							}
@@ -66,11 +69,14 @@ def get_vouchers():
 
 def get_voucher(voucher):
 	response  = connect_hotspot('GET',voucher)
+	hotspot_controller = frappe.get_doc('Hotspot Controller')
 	info_voucher = response
+	info_voucher['url'] = hotspot_controller.get_server_url(info_voucher['server']) if 'server' in info_voucher else 'http://localhost'
 	info_voucher['name1'] = info_voucher['name']
 	info_voucher['status'] = 'Active' if info_voucher['disabled'] == 'false' else 'Inactive'
 	info_voucher['limit_uptime'] = extract_time(info_voucher['limit-uptime']) if 'limit-uptime' in info_voucher else None
-	info_voucher['server'] = frappe.get_doc('Hotspot Controller').get_name(info_voucher['server']) if 'server' in info_voucher else 'الكل'
+	info_voucher['server'] = hotspot_controller.get_name(info_voucher['server']) if 'server' in info_voucher else 'الكل'
+	# info_voucher['server_name'] = hotspot_controller.get_server(info_voucher['server']) if 'server' in info_voucher else 'الكل'
 	return info_voucher
 	
 def insert_voucher(data):
@@ -211,7 +217,6 @@ def PATCH(ip,admin,password,data,voucher):
 @frappe.whitelist()
 def delete_inactive_vouchers():
 	all_vouchers = connect_hotspot("GET")
-	all_vouchers.pop(0)
 	inactive_vouchers = list(filter(lambda x: x['disabled'] == 'true', all_vouchers))
 
 	for voucher in inactive_vouchers:

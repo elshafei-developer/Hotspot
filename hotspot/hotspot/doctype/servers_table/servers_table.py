@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class HotspotTable(Document):
+class ServersTable(Document):
 	pass

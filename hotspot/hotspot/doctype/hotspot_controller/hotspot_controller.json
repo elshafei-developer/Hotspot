@@ -7,9 +7,11 @@
  "field_order": [
   "section_break_mcye",
   "ip",
-  "password",
   "column_break_tubs",
+  "section_break_vwxw",
   "user",
+  "column_break_qfhk",
+  "password",
   "section_break_jkbe",
   "hotspot_servers"
  ],
@@ -37,7 +39,7 @@
    "fieldname": "hotspot_servers",
    "fieldtype": "Table",
    "label": "Hotspot Servers",
-   "options": "Hotspot Table"
+   "options": "Servers Table"
   },
   {
    "fieldname": "section_break_mcye",
@@ -46,12 +48,20 @@
   {
    "fieldname": "column_break_tubs",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_vwxw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_qfhk",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-04-07 14:19:35.822407",
+ "modified": "2024-04-07 17:29:58.900553",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Hotspot Controller",

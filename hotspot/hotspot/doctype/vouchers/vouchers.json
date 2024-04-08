@@ -13,7 +13,6 @@
   "server",
   "uptime",
   "url",
-  "server_name",
   "section_break_posp",
   "disabled"
  ],
@@ -80,21 +79,13 @@
   {
    "fieldname": "url",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "URL"
-  },
-  {
-   "fieldname": "server_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Server Name",
-   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2024-04-07 13:36:07.793577",
+ "modified": "2024-04-08 11:48:11.491826",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers",
