@@ -43,7 +43,7 @@
         {% set url = item.url + "/login?username=" + item.voucher %}
         <img src="{{get_qr_code(url)}}" alt="{{item.voucher}}" />
       </div>
-      <p>{{item.voucher}} - ({{loop.index0 + 1}})</p>
+      <p>{{item.voucher}}</p>
     </li>
     {% endfor %}
   </ul>

@@ -20,10 +20,6 @@
   {
    "fieldname": "uptime",
    "fieldtype": "Data",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
    "label": "Uptime",
    "read_only": 1
   },
@@ -34,7 +30,6 @@
   {
    "fieldname": "name1",
    "fieldtype": "Data",
-   "in_filter": 1,
    "label": "name",
    "reqd": 1,
    "unique": 1
@@ -43,9 +38,7 @@
    "default": "0",
    "fieldname": "limit_uptime",
    "fieldtype": "Time",
-   "in_filter": 1,
    "in_list_view": 1,
-   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Limit Uptime"
   },
@@ -70,6 +63,9 @@
   {
    "fieldname": "server",
    "fieldtype": "Select",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Server"
   },
   {
@@ -79,13 +75,15 @@
   {
    "fieldname": "url",
    "fieldtype": "Data",
-   "label": "URL"
+   "hidden": 1,
+   "label": "URL",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2024-04-08 11:48:11.491826",
+ "modified": "2024-04-09 17:23:33.404892",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers",

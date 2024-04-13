@@ -1,5 +1,23 @@
 frappe.listview_settings["Vouchers"] = {
+  hide_name_filter: true,
+  get_indicator(doc) {
+    if (doc.server == null) {
+      return [__("ERROR"), "red"];
+    }
+  },
+
+  formatters: {
+    server: function (doc) {
+      if (doc == "") {
+        return [__("ERROR").bold()];
+      } else {
+        return doc;
+      }
+    },
+  },
+
   onload: function (listview) {
+    console.log(cur_list.data);
     listview.page.add_inner_button(
       "Create Printer Voucher",
       () => {
@@ -7,7 +25,6 @@ frappe.listview_settings["Vouchers"] = {
           vouchers = cur_list.data.filter((voucher) => {
             return cur_list.get_checked_items(true).includes(voucher.name);
           });
-          console.log(vouchers);
           frappe.call({
             method:
               "hotspot.hotspot.doctype.vouchers.vouchers.create_printer_voucher",

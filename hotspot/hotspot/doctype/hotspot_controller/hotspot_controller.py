@@ -11,7 +11,7 @@ class HotspotController(Document):
         for hotspot_servers in self.hotspot_servers:
             if hotspot_servers.server == server:
                 return hotspot_servers.name1
-        # frappe.throw(_(f"Error: The server `{server}` is not found."))
+        return None
 
     def get_server(self,name):
         if name == 'الكل':

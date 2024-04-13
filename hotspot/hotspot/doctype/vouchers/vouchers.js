@@ -16,6 +16,8 @@ frappe.ui.form.on("Vouchers", {
       });
   },
   server(frm) {
+    console.log("server");
+    frm.refresh_field("server");
     frappe
       .call(
         "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_server_details",
@@ -27,4 +29,8 @@ frappe.ui.form.on("Vouchers", {
         cur_frm.set_value("url", r.message);
       });
   },
+});
+let r = frappe.realtime.on("notFound", (data) => {
+  frappe.show_alert(data.message);
+  console.log("notFound");
 });
