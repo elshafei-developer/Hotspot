@@ -6,12 +6,6 @@ from frappe.model.document import Document
 from frappe import json
 
 class Vouchers(Document):
-    def termnal_print(date):
-        print('\n')
-        print("*"*20)
-        print(date)
-        print("*"*20)
-        print('\n')
 
     def db_insert(self, *args, **kwargs):
         insert_voucher(self.as_dict())
@@ -36,7 +30,7 @@ class Vouchers(Document):
 
     @staticmethod
     def get_list(args):
-        termnal_print(args.filters)
+        printData(args.filters)
         vouchers = get_vouchers(args.filters)
         if args.get('as_list'):
             return [tuple(voucher.values()) for voucher in vouchers]
@@ -79,10 +73,14 @@ def get_vouchers(filters):
 				if 'limit_uptime' in f:
 					limit_uptime_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
 					vouchers_filter = limit_uptime_filter
-				if 'server_name' in f:
-					server_name = f[-1].replace('%','')
-					server_name_filter = list(filter(lambda v: v[f[1]] == server_name, vouchers_filter))
-					vouchers_filter = server_name_filter
+				# if 'server_name' in f:
+				# 	server_name = f[-1].replace('%','')
+				# 	server_name_filter = list(filter(lambda v: v[f[1]] == server_name, vouchers_filter))
+				# 	vouchers_filter = server_name_filter
+				if 'server' in f:
+					# server = f[-1].replace('%','')
+					server_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
+					vouchers_filter = server_filter
 			return vouchers_filter
 def get_voucher(voucher):
 	response  = connect_hotspot('GET',voucher) 
@@ -287,7 +285,7 @@ def create_printer_voucher(vouchers):
 
 
 
-def termnal_print(date):
+def printData(date):
 	print('\n')
 	print("*"*20)
 	print(date)

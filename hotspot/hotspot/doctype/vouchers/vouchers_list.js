@@ -16,14 +16,35 @@ frappe.listview_settings["Vouchers"] = {
     },
   },
   onload: function (listview) {
-    console.log(listview);
-    listview.page
-      .add_select("X", ["", "Option 1", "Option 2", "Option 3"])
-      .on("change", (value) => {
-        console.log(value.target.value);
+    frappe
+      .call(
+        "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_servers"
+      )
+      .then((r) => {
+        listview.page.fields_dict.server.set_options(
+          (listview.page.fields_dict.server.df.options = ["", ...r.message])
+        );
       });
-
+    // listview.page.fields_dict.server_select.df.options = [
+    //   "",
+    //   "1",
+    //   "2",
+    //   "3",
+    //   "4",
+    // ];
     listview.refresh();
+    console.log("All ListView =>", listview);
+    console.log("Keys List View =>", Object.keys(listview));
+    console.log("Value List View =>", Object.values(listview));
+    objLisview = {};
+    for (const key in listview) {
+      if (listview.hasOwnProperty(key)) {
+        const element = listview[key];
+        objLisview[key] = element;
+      }
+    }
+    console.log("objLisview => ", objLisview);
+    // console.log(JSON.stringify(objLisview));
     listview.page.add_inner_button(
       "Create Printer Voucher",
       () => {

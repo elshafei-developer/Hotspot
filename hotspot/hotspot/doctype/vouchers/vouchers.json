@@ -9,13 +9,10 @@
   "name1",
   "status",
   "limit_uptime",
-  "server_name",
   "column_break_qhyg",
   "server",
   "uptime",
-  "url",
-  "section_break_posp",
-  "disabled"
+  "url"
  ],
  "fields": [
   {
@@ -54,21 +51,12 @@
    "options": "Active\nInactive"
   },
   {
-   "default": "false",
-   "fieldname": "disabled",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Disabled",
-   "options": "false\ntrue"
-  },
-  {
    "fieldname": "server",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Server"
-  },
-  {
-   "fieldname": "section_break_posp",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "url",
@@ -76,20 +64,12 @@
    "hidden": 1,
    "label": "URL",
    "read_only": 1
-  },
-  {
-   "fieldname": "server_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Server Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2024-04-13 17:51:19.758530",
+ "modified": "2024-04-14 20:05:23.102451",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers",
