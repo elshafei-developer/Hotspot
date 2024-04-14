@@ -8,6 +8,7 @@ from frappe.model.document import Document
 class VouchersPrinter(Document):
 	pass
 
+
 @frappe.whitelist()
 def delete_document(docname):
 	try:

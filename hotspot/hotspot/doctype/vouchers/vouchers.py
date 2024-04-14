@@ -4,10 +4,14 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe import json
-# from frappe.model.mapper import get_mapped_doc
 
 class Vouchers(Document):
-	
+    def termnal_print(date):
+        print('\n')
+        print("*"*20)
+        print(date)
+        print("*"*20)
+        print('\n')
 
     def db_insert(self, *args, **kwargs):
         insert_voucher(self.as_dict())
@@ -32,6 +36,7 @@ class Vouchers(Document):
 
     @staticmethod
     def get_list(args):
+        termnal_print(args.filters)
         vouchers = get_vouchers(args.filters)
         if args.get('as_list'):
             return [tuple(voucher.values()) for voucher in vouchers]
@@ -43,7 +48,6 @@ class Vouchers(Document):
     @staticmethod
     def get_stats(args):
         return {}
-
 
 ### FUNCTIONS ###
 @frappe.whitelist()
@@ -59,7 +63,7 @@ def get_vouchers(filters):
 							'uptime': v['uptime'],
 							'limit_uptime': extract_time(v['limit-uptime']) if 'limit-uptime' in v else None,
                             'server': hotspot_controller.get_name(v['server']) if 'server' in v else 'الكل',
-                            # 'server': v['server'] if 'server' in v else 'الكل',
+							"server_name": hotspot_controller.get_name(v['server']) if 'server' in v else "الكل",
 							'url': hotspot_controller.get_server_url(v['server']) if 'server' in v else 'http://localhost',
 							}
 		vouchers_map = list(map(data_map, vouchers))
@@ -75,6 +79,10 @@ def get_vouchers(filters):
 				if 'limit_uptime' in f:
 					limit_uptime_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
 					vouchers_filter = limit_uptime_filter
+				if 'server_name' in f:
+					server_name = f[-1].replace('%','')
+					server_name_filter = list(filter(lambda v: v[f[1]] == server_name, vouchers_filter))
+					vouchers_filter = server_name_filter
 			return vouchers_filter
 def get_voucher(voucher):
 	response  = connect_hotspot('GET',voucher) 
@@ -84,9 +92,6 @@ def get_voucher(voucher):
 		server = hotspot_controller.get_name(info_voucher['server'])
 		if server:
 			info_voucher['server'] = server
-		else:
-			# frappe.publish_realtime("notFound", {"message": _(f"this Voucher belonging to server `{info_voucher['server']}` please add this server to controller Hotspot and refresh page.")}, user=frappe.session.user)
-			frappe.msgprint(_(f"this Voucher belonging to server `{info_voucher['server']}` please add this server to controller Hotspot and refresh page."))
 	else:
 		info_voucher['server'] = 'الكل'
 	info_voucher['url'] = hotspot_controller.get_server_url(info_voucher['server']) if 'server' in info_voucher else 'http://localhost'
@@ -279,19 +284,12 @@ def create_printer_voucher(vouchers):
 		doc.insert()
 		return doc.name
 	
-# @frappe.whitelist()
-# def my_python_function():
-    # frappe.publish_realtime("notification", {"data": "some_data"}, user=frappe.session.user)
 
-# @frappe.whitelist()
-# def crete_from_vouchers(source_name, target_doc=None):
-# 	doclist = get_mapped_doc(
-# 		"Vouchers",
-# 		source_name,
-# 		{
-# 			"Vouchers":{
-# 				"doctype": "Vouchers Printer",
-# 			}
-# 		}
-# 		)
-# 	return doclist
+
+
+def termnal_print(date):
+	print('\n')
+	print("*"*20)
+	print(date)
+	print("*"*20)
+	print('\n')

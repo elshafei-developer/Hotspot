@@ -1,11 +1,11 @@
 frappe.listview_settings["Vouchers"] = {
   hide_name_filter: true,
+
   get_indicator(doc) {
     if (doc.server == null) {
       return [__("ERROR"), "red"];
     }
   },
-
   formatters: {
     server: function (doc) {
       if (doc == "") {
@@ -15,9 +15,15 @@ frappe.listview_settings["Vouchers"] = {
       }
     },
   },
-
   onload: function (listview) {
-    console.log(cur_list.data);
+    console.log(listview);
+    listview.page
+      .add_select("X", ["", "Option 1", "Option 2", "Option 3"])
+      .on("change", (value) => {
+        console.log(value.target.value);
+      });
+
+    listview.refresh();
     listview.page.add_inner_button(
       "Create Printer Voucher",
       () => {

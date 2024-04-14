@@ -13,6 +13,7 @@
   {
    "fieldname": "vouchers_table",
    "fieldtype": "Table",
+   "in_standard_filter": 1,
    "label": "Voucher Table That will Printer",
    "options": "Vouchers Table",
    "read_only": 1
@@ -25,7 +26,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-06 12:51:14.275326",
+ "modified": "2024-04-13 11:43:05.471914",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers Printer",

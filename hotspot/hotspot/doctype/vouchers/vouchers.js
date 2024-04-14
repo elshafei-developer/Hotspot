@@ -12,11 +12,22 @@ frappe.ui.form.on("Vouchers", {
         "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_servers"
       )
       .then((r) => {
+        if (!frm.is_new()) {
+          if (!r.message.includes(frm.doc.server)) {
+            if (frm.doc.server == "الكل") {
+              frm.set_intro("This Voucher Run on All Hotspot Server", "green");
+            } else {
+              frm.set_intro(
+                "Not Found Server Hotspot For This Voucher in Hotspot Controller",
+                "red"
+              );
+            }
+          }
+        }
         set_field_options("server", r.message);
       });
   },
   server(frm) {
-    console.log("server");
     frm.refresh_field("server");
     frappe
       .call(
@@ -29,8 +40,4 @@ frappe.ui.form.on("Vouchers", {
         cur_frm.set_value("url", r.message);
       });
   },
-});
-let r = frappe.realtime.on("notFound", (data) => {
-  frappe.show_alert(data.message);
-  console.log("notFound");
 });
