@@ -13,7 +13,7 @@ frappe.ui.form.on("Vouchers", {
       )
       .then((r) => {
         if (!frm.is_new()) {
-          if (!r.message.includes(frm.doc.server)) {
+          if (!r.message.servers.includes(frm.doc.server)) {
             if (frm.doc.server == "الكل") {
               frm.set_intro("This Voucher Run on All Hotspot Server", "green");
             } else {
@@ -24,20 +24,21 @@ frappe.ui.form.on("Vouchers", {
             }
           }
         }
-        set_field_options("server", r.message);
+        set_field_options("server", r.message.servers);
+        set_field_options("limit_uptime", r.message.times);
       });
   },
-  server(frm) {
-    frm.refresh_field("server");
-    frappe
-      .call(
-        "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_server_details",
-        {
-          server: frm.doc.server,
-        }
-      )
-      .then((r) => {
-        cur_frm.set_value("url", r.message);
-      });
-  },
+  //   server(frm) {
+  //     frm.refresh_field("server");
+  //     frappe
+  //       .call(
+  //         "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_server_details",
+  //         {
+  //           server: frm.doc.server,
+  //         }
+  //       )
+  //       .then((r) => {
+  //         cur_frm.set_value("url", r.message);
+  //       });
+  //   },
 });

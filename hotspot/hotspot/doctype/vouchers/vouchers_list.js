@@ -22,20 +22,19 @@ frappe.listview_settings["Vouchers"] = {
       )
       .then((r) => {
         listview.page.fields_dict.server.set_options(
-          (listview.page.fields_dict.server.df.options = ["", ...r.message])
+          (listview.page.fields_dict.server.df.options = [
+            "",
+            ...r.message.servers,
+          ])
+        );
+        listview.page.fields_dict.limit_uptime.set_options(
+          (listview.page.fields_dict.limit_uptime.df.options = [
+            "",
+            ...r.message.times,
+          ])
         );
       });
-    // listview.page.fields_dict.server_select.df.options = [
-    //   "",
-    //   "1",
-    //   "2",
-    //   "3",
-    //   "4",
-    // ];
     listview.refresh();
-    console.log("All ListView =>", listview);
-    console.log("Keys List View =>", Object.keys(listview));
-    console.log("Value List View =>", Object.values(listview));
     objLisview = {};
     for (const key in listview) {
       if (listview.hasOwnProperty(key)) {
@@ -43,8 +42,6 @@ frappe.listview_settings["Vouchers"] = {
         objLisview[key] = element;
       }
     }
-    console.log("objLisview => ", objLisview);
-    // console.log(JSON.stringify(objLisview));
     listview.page.add_inner_button(
       "Create Printer Voucher",
       () => {

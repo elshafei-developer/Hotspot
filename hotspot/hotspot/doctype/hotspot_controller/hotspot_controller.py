@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils.data import today, now, add_days, add_to_date, getdate, get_datetime, get_time
 
 
 class HotspotController(Document):
@@ -21,19 +22,42 @@ class HotspotController(Document):
                 return hotspot_servers.server
         frappe.throw(_(f"Error: The name `{name}` is not found."))
 
+    def get_limit_uptime(self,name):
+        # return(name)
+        for vouchers_times in self.vouchers_times:
+            if vouchers_times.name1 == name:
+                return vouchers_times.time
+        frappe.throw(_(f"Error: The name `{name}` is not found."))
+
+    def get_limit_uptime_name(self,time):
+        print(time)
+        time =  get_time(time)
+        for vouchers_times in self.vouchers_times:
+            print(get_time(vouchers_times.time))
+            if get_time(vouchers_times.time) == time:
+                return vouchers_times.name1
+        return None
+
     def get_server_url(self,server):
         for hotspot_servers in self.hotspot_servers:
             if hotspot_servers.server == server:
                 return hotspot_servers.url
-        # frappe.throw(_(f"Error: The server `{server}` is not found."))
 
 @frappe.whitelist()
 def get_servers():
     hotspot_controller = frappe.get_doc('Hotspot Controller')
     servers = []
+    times = []
+
     for hotspot_servers in hotspot_controller.hotspot_servers:
         servers.append(hotspot_servers.name1)
-    return servers
+    for vouchers_times in hotspot_controller.vouchers_times:
+        times.append(vouchers_times.name1)
+    obj = {
+        "servers":servers,
+        "times":times
+    }
+    return obj
 
 @frappe.whitelist()
 def get_server_details(server):

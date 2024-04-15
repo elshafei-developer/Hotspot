@@ -11,8 +11,7 @@
   "limit_uptime",
   "column_break_qhyg",
   "server",
-  "uptime",
-  "url"
+  "uptime"
  ],
  "fields": [
   {
@@ -33,12 +32,12 @@
    "unique": 1
   },
   {
-   "default": "0",
    "fieldname": "limit_uptime",
-   "fieldtype": "Time",
+   "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Limit Uptime"
+   "label": "Limit Uptime",
+   "reqd": 1
   },
   {
    "fieldname": "status",
@@ -57,19 +56,12 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Server"
-  },
-  {
-   "fieldname": "url",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "URL",
-   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2024-04-14 20:05:23.102451",
+ "modified": "2024-04-15 14:24:24.358761",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers",

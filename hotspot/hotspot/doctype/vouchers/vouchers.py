@@ -9,7 +9,7 @@ class Vouchers(Document):
 
     def db_insert(self, *args, **kwargs):
         insert_voucher(self.as_dict())
-		
+
     def db_update(self, *args, **kwargs):
         update_voucher(self.name, self.as_dict())
         self.modified = False
@@ -30,7 +30,6 @@ class Vouchers(Document):
 
     @staticmethod
     def get_list(args):
-        printData(args.filters)
         vouchers = get_vouchers(args.filters)
         if args.get('as_list'):
             return [tuple(voucher.values()) for voucher in vouchers]
@@ -46,6 +45,7 @@ class Vouchers(Document):
 ### FUNCTIONS ###
 @frappe.whitelist()
 def get_vouchers(filters):
+	printData(filters)
 	vouchers = connect_hotspot('GET')
 	if vouchers == False:
 		frappe.throw(_(f"Error: The hotspot controller is disconnected."))
@@ -55,9 +55,8 @@ def get_vouchers(filters):
 		data_map = lambda v: {'name':v['name'],
 							'status': 'Active' if v['disabled'] == 'false' else 'Inactive',
 							'uptime': v['uptime'],
-							'limit_uptime': extract_time(v['limit-uptime']) if 'limit-uptime' in v else None,
+							'limit_uptime':hotspot_controller.get_limit_uptime_name(v['limit-uptime']) if 'limit-uptime' in v else '00:00:00',
                             'server': hotspot_controller.get_name(v['server']) if 'server' in v else 'الكل',
-							"server_name": hotspot_controller.get_name(v['server']) if 'server' in v else "الكل",
 							'url': hotspot_controller.get_server_url(v['server']) if 'server' in v else 'http://localhost',
 							}
 		vouchers_map = list(map(data_map, vouchers))
@@ -67,18 +66,12 @@ def get_vouchers(filters):
 			vouchers_filter = vouchers_map
 			for f in filters:
 				if 'status' in f:
-					print(f'{f[1]} => {f[-1]}')
 					status_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_map))
 					vouchers_filter = status_filter
 				if 'limit_uptime' in f:
 					limit_uptime_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
 					vouchers_filter = limit_uptime_filter
-				# if 'server_name' in f:
-				# 	server_name = f[-1].replace('%','')
-				# 	server_name_filter = list(filter(lambda v: v[f[1]] == server_name, vouchers_filter))
-				# 	vouchers_filter = server_name_filter
 				if 'server' in f:
-					# server = f[-1].replace('%','')
 					server_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
 					vouchers_filter = server_filter
 			return vouchers_filter
@@ -95,7 +88,7 @@ def get_voucher(voucher):
 	info_voucher['url'] = hotspot_controller.get_server_url(info_voucher['server']) if 'server' in info_voucher else 'http://localhost'
 	info_voucher['name1'] = info_voucher['name']
 	info_voucher['status'] = 'Active' if info_voucher['disabled'] == 'false' else 'Inactive'
-	info_voucher['limit_uptime'] = extract_time(info_voucher['limit-uptime']) if 'limit-uptime' in info_voucher else None
+	info_voucher['limit_uptime'] = hotspot_controller.get_limit_uptime_name(info_voucher['limit-uptime']) if 'limit-uptime' in info_voucher else None
 	return info_voucher
 	
 def insert_voucher(data):
@@ -120,11 +113,13 @@ def voucher_exists(new_name,old_name=None):
 # structure of voucher that MikroTik Accept
 def voucher_structure(data):
 	hotspot_controller = frappe.get_doc('Hotspot Controller')
+	time = hotspot_controller.get_limit_uptime(data['limit_uptime']) if data['limit_uptime'] else '00:00:00'
+	
 	return {
 		"name": data['name1'].replace(' ','_'),
 		'disabled': 'false' if data['status'] == 'Active' else 'true',
 		'server': hotspot_controller.get_server(data['server']) if data['server'] != 'الكل' else 'all',
-		'limit-uptime':  data['limit_uptime'] if data['limit_uptime'] else '00:00:00',
+		'limit-uptime':  convert_time_format(time),
 	}
 
 def extract_time(time_str):
@@ -148,7 +143,8 @@ def extract_time(time_str):
     return formatted_time
 
 def convert_time_format(time_str):
-    parts = time_str.split(':')
+    parts = str(time_str).split(':')
+    # parts = time_str.split(':')
     hours = int(parts[0])
     minutes = int(parts[1])
     seconds = int(parts[2])
