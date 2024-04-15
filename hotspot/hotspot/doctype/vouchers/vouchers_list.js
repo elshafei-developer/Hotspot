@@ -32,6 +32,69 @@ frappe.listview_settings["Vouchers"] = {
             ...r.message.times,
           ])
         );
+        return r;
+      })
+      .then((r) => {
+        listview.page.add_inner_button("Create Vouchers", () => {
+          let dialog = new frappe.ui.Dialog({
+            title: "Create Vouchers",
+            fields: [
+              {
+                label: "Number of Vouchers",
+                fieldname: "number_voucher",
+                fieldtype: "Int",
+                reqd: 1,
+              },
+              {
+                label: "Voucher Server",
+                fieldname: "server",
+                fieldtype: "Select",
+                options: r.message.servers,
+                reqd: 1,
+              },
+              {
+                label: "Voucher Time",
+                fieldname: "limit_uptime",
+                fieldtype: "Select",
+                options: r.message.times,
+                reqd: 1,
+              },
+            ],
+            primary_action_label: "Create",
+            primary_action(values) {
+              console.log(values);
+              frappe.call({
+                method:
+                  "hotspot.hotspot.doctype.vouchers.vouchers.crete_vouchers_background",
+                args: {
+                  number_vouchers: values.number_voucher,
+                  server: values.server,
+                  limit_uptime: values.limit_uptime,
+                },
+                // freeze: true,
+                // freeze_message: "Creating Vouchers...",
+                // callback: function (r) {
+                //   if (r.message != false) {
+                //     listview.refresh();
+                //     frappe.show_alert(
+                //       {
+                //         message: __("Sucssefully Created Vouchers"),
+                //         indicator: "green",
+                //         title: __("Success"),
+                //       },
+                //       1000
+                //     );
+                //     console.log("Sucssefully Created Vouchers");
+                //   } else {
+                //     frappe.throw(`ERROR => ${r.massage}`);
+                //   }
+                // },
+              });
+              dialog.hide();
+            },
+          });
+          dialog.show();
+        });
       });
     listview.page.add_inner_button(
       "Create Printer Voucher",
@@ -68,7 +131,7 @@ frappe.listview_settings["Vouchers"] = {
       () => {
         frappe.confirm(
           "Are you sure you want to delete all inactive vouchers?",
-          function () {
+          () => {
             frappe
               .call({
                 method:

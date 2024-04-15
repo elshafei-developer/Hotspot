@@ -2,6 +2,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe import json
+from frappe.utils import random_string
 import requests
 
 class Vouchers(Document):
@@ -21,6 +22,7 @@ class Vouchers(Document):
 
     def delete(args):
         delete_voucher(args.name)
+        args.update()
 
     def load_from_db(self):
         self.modified = False
@@ -241,7 +243,25 @@ def create_printer_voucher(vouchers):
 			})
 		doc.insert()
 		return doc.name
-	
+
+@frappe.whitelist()
+def crete_vouchers_background(number_vouchers,server,limit_uptime):
+	frappe.enqueue('hotspot.hotspot.doctype.vouchers.vouchers.create_vouchers', queue='long',number_vouchers=number_vouchers,server=server,limit_uptime=limit_uptime)
+	return True
+
+@frappe.whitelist()
+def create_vouchers(number_vouchers,server,limit_uptime):
+    frappe.publish_realtime('msgprint', 'Starting long job...')
+    for voucher in range(int(number_vouchers)):
+        data = {
+            "name1": server + random_string(3),
+            'status': 'Active' ,
+            'server':  server,
+            'limit_uptime':  limit_uptime,
+        }
+        insert_voucher(data)
+    frappe.publish_realtime('msgprint', 'Ending long job...')
+    return True
 
 
 # FOR TESTING
