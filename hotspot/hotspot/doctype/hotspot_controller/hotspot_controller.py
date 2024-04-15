@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils.data import today, now, add_days, add_to_date, getdate, get_datetime, get_time
+from frappe.utils.data import get_time
 
 
 class HotspotController(Document):
@@ -23,7 +23,6 @@ class HotspotController(Document):
         frappe.throw(_(f"Error: The name `{name}` is not found."))
 
     def get_limit_uptime(self,name):
-        # return(name)
         for vouchers_times in self.vouchers_times:
             if vouchers_times.name1 == name:
                 return vouchers_times.time
@@ -42,7 +41,7 @@ class HotspotController(Document):
                 return hotspot_servers.url
 
 @frappe.whitelist()
-def get_servers():
+def get_info_table():
     hotspot_controller = frappe.get_doc('Hotspot Controller')
     servers = []
     times = []
