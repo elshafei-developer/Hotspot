@@ -35,13 +35,6 @@ frappe.listview_settings["Vouchers"] = {
         );
       });
     listview.refresh();
-    objLisview = {};
-    for (const key in listview) {
-      if (listview.hasOwnProperty(key)) {
-        const element = listview[key];
-        objLisview[key] = element;
-      }
-    }
     listview.page.add_inner_button(
       "Create Printer Voucher",
       () => {

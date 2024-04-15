@@ -30,10 +30,8 @@ class HotspotController(Document):
         frappe.throw(_(f"Error: The name `{name}` is not found."))
 
     def get_limit_uptime_name(self,time):
-        print(time)
         time =  get_time(time)
         for vouchers_times in self.vouchers_times:
-            print(get_time(vouchers_times.time))
             if get_time(vouchers_times.time) == time:
                 return vouchers_times.name1
         return None

@@ -1,9 +1,8 @@
-import frappe.realtime
-import requests
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe import json
+import requests
 
 class Vouchers(Document):
 
@@ -45,7 +44,6 @@ class Vouchers(Document):
 ### FUNCTIONS ###
 @frappe.whitelist()
 def get_vouchers(filters):
-	printData(filters)
 	vouchers = connect_hotspot('GET')
 	if vouchers == False:
 		frappe.throw(_(f"Error: The hotspot controller is disconnected."))
@@ -66,7 +64,7 @@ def get_vouchers(filters):
 			vouchers_filter = vouchers_map
 			for f in filters:
 				if 'status' in f:
-					status_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_map))
+					status_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
 					vouchers_filter = status_filter
 				if 'limit_uptime' in f:
 					limit_uptime_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
@@ -76,21 +74,15 @@ def get_vouchers(filters):
 					vouchers_filter = server_filter
 			return vouchers_filter
 def get_voucher(voucher):
-	response  = connect_hotspot('GET',voucher) 
-	info_voucher = response
+	info_voucher = connect_hotspot('GET',voucher)
 	hotspot_controller = frappe.get_doc('Hotspot Controller')
-	if 'server' in info_voucher:
-		server = hotspot_controller.get_name(info_voucher['server'])
-		if server:
-			info_voucher['server'] = server
-	else:
-		info_voucher['server'] = 'الكل'
 	info_voucher['url'] = hotspot_controller.get_server_url(info_voucher['server']) if 'server' in info_voucher else 'http://localhost'
+	info_voucher['server'] = hotspot_controller.get_name(info_voucher['server']) if 'server' in info_voucher else 'الكل'
 	info_voucher['name1'] = info_voucher['name']
 	info_voucher['status'] = 'Active' if info_voucher['disabled'] == 'false' else 'Inactive'
 	info_voucher['limit_uptime'] = hotspot_controller.get_limit_uptime_name(info_voucher['limit-uptime']) if 'limit-uptime' in info_voucher else None
 	return info_voucher
-	
+
 def insert_voucher(data):
 	data = voucher_structure(data)
 	connect_hotspot('PUT',data)
@@ -122,42 +114,14 @@ def voucher_structure(data):
 		'limit-uptime':  convert_time_format(time),
 	}
 
-def extract_time(time_str):
-    hours, minutes, seconds, days = 0, 0, 0, 0
-    if 'd' in time_str:
-        parts = time_str.split('d')
-        days = int(parts[0])
-        time_str = parts[1]
-    if 'h' in time_str:
-        parts = time_str.split('h')
-        hours = int(parts[0])
-        time_str = parts[1]
-    if 'm' in time_str:
-        parts = time_str.split('m')
-        minutes = int(parts[0])
-        time_str = parts[1]
-    if 's' in time_str:
-        seconds = int(time_str.replace('s', ''))
-    
-    formatted_time = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-    return formatted_time
-
 def convert_time_format(time_str):
     parts = str(time_str).split(':')
-    # parts = time_str.split(':')
     hours = int(parts[0])
     minutes = int(parts[1])
     seconds = int(parts[2])
     
     formatted_time = f"{hours}h{minutes}m{seconds}s"
     return formatted_time
-
-from datetime import datetime
-def str_to_time(time_str):
-    time_format = "%H:%M:%S"
-    time_obj = datetime.strptime(time_str, time_format).time()
-    
-    return time_obj
 
 ### REST API ###
 def connect_hotspot(method,data=None,voucher=None):
@@ -182,7 +146,7 @@ def GET(ip,admin,password,name=None):
 			if api.status_code == 200:
 				return api.json()
 			else:
-				frappe.throw(_(f"Error: {api.status_code} Not Found"))
+				frappe.throw(_(f"Error: {api.status_code} "))
 				return False
 		except requests.exceptions.RequestException as e:
 			frappe.throw(_(f"Error: => {e}"))
@@ -209,7 +173,7 @@ def PUT(ip,admin,password,data):
 			return True
 		else:
 			if api.status_code == 400:
-				frappe.throw(_(f"Error: {api.status_code} the server ''{data['server']}'' is not found in Hotspot."))
+				frappe.throw(_(f"Error: {api.status_code}"))
 				return False
 			frappe.throw(_(f"Error: {api.status_code}"))
 			return False
@@ -241,7 +205,7 @@ def PATCH(ip,admin,password,data,voucher):
 			return True
 		else:
 			if api.status_code == 400:
-				frappe.throw(_(f"Error: {api.status_code} the server ''{data['server']}'' is not found in Hotspot."))
+				frappe.throw(_(f"Error: {api.status_code}"))
 				return False
 			frappe.throw(_(f"Error: {api.status_code}"))
 			return False
@@ -280,10 +244,12 @@ def create_printer_voucher(vouchers):
 	
 
 
-
-def printData(date):
+# FOR TESTING
+def printData(date,name=None):
 	print('\n')
 	print("*"*20)
+	if name:
+		print(name)
 	print(date)
 	print("*"*20)
 	print('\n')
