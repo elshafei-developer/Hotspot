@@ -1,6 +1,5 @@
 frappe.listview_settings["Vouchers"] = {
   hide_name_filter: true,
-
   get_indicator(doc) {
     if (doc.server == null) {
       return [__("ERROR"), "red"];
@@ -18,7 +17,7 @@ frappe.listview_settings["Vouchers"] = {
   onload: function (listview) {
     frappe
       .call(
-        "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_servers"
+        "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_info_table"
       )
       .then((r) => {
         listview.page.fields_dict.server.set_options(
@@ -34,7 +33,6 @@ frappe.listview_settings["Vouchers"] = {
           ])
         );
       });
-    listview.refresh();
     listview.page.add_inner_button(
       "Create Printer Voucher",
       () => {

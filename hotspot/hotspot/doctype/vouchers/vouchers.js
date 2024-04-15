@@ -3,13 +3,11 @@ frappe.ui.form.on("Vouchers", {
     name1 = frm.doc.name1.replace(/ /g, "_");
     frappe.set_route("Form", "Vouchers", name1);
     frm.set_value("name1", frm.doc.name);
-    frm.refresh_field("url");
-    frm.refresh();
   },
   refresh(frm) {
     frappe
       .call(
-        "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_servers"
+        "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_info_table"
       )
       .then((r) => {
         if (!frm.is_new()) {
@@ -28,17 +26,4 @@ frappe.ui.form.on("Vouchers", {
         set_field_options("limit_uptime", r.message.times);
       });
   },
-  //   server(frm) {
-  //     frm.refresh_field("server");
-  //     frappe
-  //       .call(
-  //         "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_server_details",
-  //         {
-  //           server: frm.doc.server,
-  //         }
-  //       )
-  //       .then((r) => {
-  //         cur_frm.set_value("url", r.message);
-  //       });
-  //   },
 });
