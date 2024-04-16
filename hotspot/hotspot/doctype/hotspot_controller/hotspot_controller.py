@@ -39,7 +39,6 @@ class HotspotController(Document):
         for hotspot_servers in self.hotspot_servers:
             if hotspot_servers.server == server:
                 return hotspot_servers.url
-
 @frappe.whitelist()
 def get_info_table():
     hotspot_controller = frappe.get_doc('Hotspot Controller')

@@ -62,7 +62,6 @@ frappe.listview_settings["Vouchers"] = {
             ],
             primary_action_label: "Create",
             primary_action(values) {
-              console.log(values);
               frappe.call({
                 method:
                   "hotspot.hotspot.doctype.vouchers.vouchers.crete_vouchers_background",
@@ -71,24 +70,6 @@ frappe.listview_settings["Vouchers"] = {
                   server: values.server,
                   limit_uptime: values.limit_uptime,
                 },
-                // freeze: true,
-                // freeze_message: "Creating Vouchers...",
-                // callback: function (r) {
-                //   if (r.message != false) {
-                //     listview.refresh();
-                //     frappe.show_alert(
-                //       {
-                //         message: __("Sucssefully Created Vouchers"),
-                //         indicator: "green",
-                //         title: __("Success"),
-                //       },
-                //       1000
-                //     );
-                //     console.log("Sucssefully Created Vouchers");
-                //   } else {
-                //     frappe.throw(`ERROR => ${r.massage}`);
-                //   }
-                // },
               });
               dialog.hide();
             },
@@ -135,7 +116,7 @@ frappe.listview_settings["Vouchers"] = {
             frappe
               .call({
                 method:
-                  "hotspot.hotspot.doctype.vouchers.vouchers.delete_inactive_vouchers",
+                  "hotspot.hotspot.doctype.vouchers.vouchers.delete_inactive_vouchers_background",
                 callback: function (r) {
                   if (r.message) {
                     frappe.msgprint(r.message);
@@ -154,3 +135,59 @@ frappe.listview_settings["Vouchers"] = {
     );
   },
 };
+// frappe.realtime.on("create_printer_voucher", (data) => {
+//   frappe.set_route("Form", "Vouchers Printer", data);
+// });
+// frappe.realtime.on("creating_vouchers", (data) => {
+//   frappe.show_alert(
+//     {
+//       message: __(data),
+//       indicator: "blue",
+//       title: __("Info"),
+//     },
+//     10
+//   );
+// });
+// frappe.realtime.on("successfully_created_vouchers", (data) => {
+//   frappe.show_alert(
+//     {
+//       message: __(data),
+//       indicator: "green",
+//       title: __("Success"),
+//     },
+//     10
+//   );
+//   cur_list.refresh();
+// });
+// frappe.realtime.on("deleting_inactive_vouchers", (data) => {
+//   frappe.show_alert(
+//     {
+//       message: __(data),
+//       indicator: "blue",
+//       title: __("Info"),
+//     },
+//     10
+//   );
+// });
+// frappe.realtime.on("successfully_deleted_inactive_vouchers", (data) => {
+//   frappe.show_alert(
+//     {
+//       message: __(data),
+//       indicator: "green",
+//       title: __("Success"),
+//     },
+//     10
+//   );
+//   cur_list.refresh();
+// });
+frappe.realtime.on("realtime_vouchers", (data) => {
+  cur_list.refresh();
+  frappe.show_alert(
+    {
+      message: __(data.message),
+      indicator: data.indicator,
+      title: __(data.title),
+    },
+    10
+  );
+});

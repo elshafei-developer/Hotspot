@@ -2,12 +2,14 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe import json
+import frappe.realtime
 from frappe.utils import random_string
 import requests
 
 class Vouchers(Document):
 
     def db_insert(self, *args, **kwargs):
+        self.queue_action('insert')
         insert_voucher(self.as_dict())
 
     def db_update(self, *args, **kwargs):
@@ -15,6 +17,7 @@ class Vouchers(Document):
         self.modified = False
 
     def update(self, *args, **kwargs):
+        # update_voucher(self.name, self.as_dict())
         return super().update(*args)
 
     def before_rename(self, old, new, merge=False):
@@ -22,7 +25,6 @@ class Vouchers(Document):
 
     def delete(args):
         delete_voucher(args.name)
-        args.update()
 
     def load_from_db(self):
         self.modified = False
@@ -140,7 +142,7 @@ def connect_hotspot(method,data=None,voucher=None):
 		return DELETE(ip,admin,password,data)
 	if method == 'PATCH':
 		return PATCH(ip,admin,password,data,voucher)
-	
+
 def GET(ip,admin,password,name=None):
 	if name:
 		try:
@@ -196,7 +198,7 @@ def DELETE(ip,admin,password,voucher):
 	except requests.exceptions.RequestException as e:
 		frappe.throw(_(f"Error: => {e}"))
 		return False
-	
+
 def PATCH(ip,admin,password,data,voucher):
 	if voucher == None:
 		frappe.throw(_(f"Error: A name must be given to Update the Voucher"))
@@ -215,17 +217,29 @@ def PATCH(ip,admin,password,data,voucher):
 		frappe.throw(_(f"Error: => {e}"))
 		return False
 
-
 ### ACTION ###
 @frappe.whitelist()
+def delete_inactive_vouchers_background():
+    frappe.enqueue('hotspot.hotspot.doctype.vouchers.vouchers.delete_inactive_vouchers')
+
+@frappe.whitelist()
 def delete_inactive_vouchers():
+	frappe.publish_realtime("realtime_vouchers", {
+		"message": f"Will delete all inactive vouchers...",
+		"indicator": "blue",
+		"title": "Deleting Inactive Vouchers",
+    })
 	all_vouchers = connect_hotspot("GET")
+	(all_vouchers,"All Vouchers")
 	inactive_vouchers = list(filter(lambda x: x['disabled'] == 'true', all_vouchers))
 
 	for voucher in inactive_vouchers:
 		connect_hotspot("DELETE",voucher['name'])
-	frappe.msgprint(_(f"Vouchers Inactive deleted successfully."))
-
+	frappe.publish_realtime("realtime_vouchers", {
+		"message": f"Successfully Deleted All Inactive Vouchers",
+		"indicator": "green",
+		"title": "Deleted Inactive Vouchers",
+    })
 
 @frappe.whitelist()
 def create_printer_voucher(vouchers):
@@ -245,13 +259,18 @@ def create_printer_voucher(vouchers):
 		return doc.name
 
 @frappe.whitelist()
-def crete_vouchers_background(number_vouchers,server,limit_uptime):
-	frappe.enqueue('hotspot.hotspot.doctype.vouchers.vouchers.create_vouchers', queue='long',number_vouchers=number_vouchers,server=server,limit_uptime=limit_uptime)
-	return True
+def crete_vouchers_background(number_vouchers,server,limit_uptime): 
+    frappe.enqueue('hotspot.hotspot.doctype.vouchers.vouchers.create_vouchers',number_vouchers=number_vouchers,server=server,limit_uptime=limit_uptime)
 
 @frappe.whitelist()
 def create_vouchers(number_vouchers,server,limit_uptime):
-    frappe.publish_realtime('msgprint', 'Starting long job...')
+    frappe.publish_realtime("realtime_vouchers", {
+		"message": f"Creating {number_vouchers} Vouchers for {server} server...",
+		"indicator": "blue",
+		"title": "Creating Vouchers",
+    })
+    hotspot_controller = frappe.get_doc('Hotspot Controller')
+    vouchers = []
     for voucher in range(int(number_vouchers)):
         data = {
             "name1": server + random_string(3),
@@ -260,9 +279,24 @@ def create_vouchers(number_vouchers,server,limit_uptime):
             'limit_uptime':  limit_uptime,
         }
         insert_voucher(data)
-    frappe.publish_realtime('msgprint', 'Ending long job...')
+        vouchers.append(data)
+    doc = frappe.new_doc('Vouchers Printer')
+    for v in list(vouchers):
+            name = v['name1'].replace(' ','_')
+            server = hotspot_controller.get_server(v['server'])
+            url = hotspot_controller.get_server_url(server)
+            doc.append('vouchers_table', {
+                'voucher': name,
+                'server': v['server'],
+                'url':url,
+            })
+    doc.insert()
+    frappe.publish_realtime("realtime_vouchers", {
+		"message": f"Successfully Created {number_vouchers} Vouchers for {v['server']} server.",
+		"indicator": "green",
+		"title": "Created Vouchers",
+    })
     return True
-
 
 # FOR TESTING
 def printData(date,name=None):
