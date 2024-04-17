@@ -59,6 +59,11 @@ frappe.listview_settings["Vouchers"] = {
                 options: r.message.times,
                 reqd: 1,
               },
+              {
+                label: "Create Print",
+                fieldname: "create_print",
+                fieldtype: "Check",
+              },
             ],
             primary_action_label: "Create",
             primary_action(values) {
@@ -69,6 +74,7 @@ frappe.listview_settings["Vouchers"] = {
                   number_vouchers: values.number_voucher,
                   server: values.server,
                   limit_uptime: values.limit_uptime,
+                  create_print: values.create_print == 1 ? true : false,
                 },
               });
               dialog.hide();
@@ -135,59 +141,31 @@ frappe.listview_settings["Vouchers"] = {
     );
   },
 };
-// frappe.realtime.on("create_printer_voucher", (data) => {
-//   frappe.set_route("Form", "Vouchers Printer", data);
-// });
-// frappe.realtime.on("creating_vouchers", (data) => {
-//   frappe.show_alert(
-//     {
-//       message: __(data),
-//       indicator: "blue",
-//       title: __("Info"),
-//     },
-//     10
-//   );
-// });
-// frappe.realtime.on("successfully_created_vouchers", (data) => {
-//   frappe.show_alert(
-//     {
-//       message: __(data),
-//       indicator: "green",
-//       title: __("Success"),
-//     },
-//     10
-//   );
-//   cur_list.refresh();
-// });
-// frappe.realtime.on("deleting_inactive_vouchers", (data) => {
-//   frappe.show_alert(
-//     {
-//       message: __(data),
-//       indicator: "blue",
-//       title: __("Info"),
-//     },
-//     10
-//   );
-// });
-// frappe.realtime.on("successfully_deleted_inactive_vouchers", (data) => {
-//   frappe.show_alert(
-//     {
-//       message: __(data),
-//       indicator: "green",
-//       title: __("Success"),
-//     },
-//     10
-//   );
-//   cur_list.refresh();
-// });
 frappe.realtime.on("realtime_vouchers", (data) => {
   cur_list.refresh();
+  //   cur_list.reload_doc();
   frappe.show_alert(
     {
       message: __(data.message),
       indicator: data.indicator,
       title: __(data.title),
     },
-    10
+    7
   );
 });
+frappe.realtime.on(
+  "realtime_vouchers_printer",
+  (r) => {
+    frappe.show_alert({
+      message: __(r.message + "{0}", [
+        '<a href="/app/vouchers-printer/' +
+          r.name_doc +
+          '">' +
+          "<b>View</b>" +
+          "</a>",
+      ]),
+      indicator: "green",
+    });
+  },
+  7
+);

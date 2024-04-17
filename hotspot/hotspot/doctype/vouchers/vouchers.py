@@ -219,10 +219,26 @@ def PATCH(ip,admin,password,data,voucher):
 
 ### ACTION ###
 @frappe.whitelist()
-def delete_inactive_vouchers_background():
-    frappe.enqueue('hotspot.hotspot.doctype.vouchers.vouchers.delete_inactive_vouchers')
+def create_printer_voucher(vouchers):
+	doc = frappe.new_doc('Vouchers Printer')
+	vouchers = json.loads(vouchers)
+	if type(vouchers) != list:
+		frappe.throw(_(f"ERROR => Type Data is Not Array"))
+		return False
+	else:
+		for voucher in list(vouchers):
+			doc.append('vouchers_table', {
+				'voucher': voucher['name'],
+				'server': voucher['server'],
+				'url': voucher['url'],
+                "limit_uptime": voucher['limit_uptime'],
+			})
+		doc.insert()
+		return doc.name
 
 @frappe.whitelist()
+def delete_inactive_vouchers_background():
+    frappe.enqueue(delete_inactive_vouchers)
 def delete_inactive_vouchers():
 	frappe.publish_realtime("realtime_vouchers", {
 		"message": f"Will delete all inactive vouchers...",
@@ -242,28 +258,35 @@ def delete_inactive_vouchers():
     })
 
 @frappe.whitelist()
-def create_printer_voucher(vouchers):
-	doc = frappe.new_doc('Vouchers Printer')
-	vouchers = json.loads(vouchers)
-	if type(vouchers) != list:
-		frappe.throw(_(f"ERROR => Type Data is Not Array"))
-		return False
-	else:
-		for voucher in list(vouchers):
-			doc.append('vouchers_table', {
-				'voucher': voucher['name'],
-				'server': voucher['server'],
-				'url': voucher['url'],
-			})
-		doc.insert()
-		return doc.name
-
-@frappe.whitelist()
-def crete_vouchers_background(number_vouchers,server,limit_uptime): 
-    frappe.enqueue('hotspot.hotspot.doctype.vouchers.vouchers.create_vouchers',number_vouchers=number_vouchers,server=server,limit_uptime=limit_uptime)
-
-@frappe.whitelist()
+def crete_vouchers_background(number_vouchers,server,limit_uptime,create_print):
+    printData(create_print,'create_print')
+    if create_print == 'true':
+        frappe.enqueue(create_vouchers_with_print,number_vouchers=number_vouchers,server=server,limit_uptime=limit_uptime)
+    else:
+        frappe.enqueue(create_vouchers,number_vouchers=number_vouchers,server=server,limit_uptime=limit_uptime)
 def create_vouchers(number_vouchers,server,limit_uptime):
+    frappe.publish_realtime("realtime_vouchers", {
+		"message": f"Creating {number_vouchers} Vouchers for {server} server...",
+		"indicator": "blue",
+		"title": "Creating Vouchers",
+    })
+    vouchers = []
+    for voucher in range(int(number_vouchers)):
+        data = {
+            "name1": server + random_string(3),
+            'status': 'Active' ,
+            'server':  server,
+            'limit_uptime':  limit_uptime,
+        }
+        insert_voucher(data)
+        vouchers.append(data)
+    frappe.publish_realtime("realtime_vouchers", {
+        "message": f"Successfully Created {number_vouchers} Vouchers.",
+        "indicator": "green",
+        "title": "Created Vouchers",
+    })
+    return vouchers
+def create_vouchers_with_print(number_vouchers,server,limit_uptime):
     frappe.publish_realtime("realtime_vouchers", {
 		"message": f"Creating {number_vouchers} Vouchers for {server} server...",
 		"indicator": "blue",
@@ -289,14 +312,17 @@ def create_vouchers(number_vouchers,server,limit_uptime):
                 'voucher': name,
                 'server': v['server'],
                 'url':url,
+                "limit_uptime": limit_uptime,
             })
     doc.insert()
-    frappe.publish_realtime("realtime_vouchers", {
-		"message": f"Successfully Created {number_vouchers} Vouchers for {v['server']} server.",
-		"indicator": "green",
-		"title": "Created Vouchers",
+    name_doc = doc.name
+    frappe.publish_realtime("realtime_vouchers_printer", {
+        "message": f"Successfully Created {number_vouchers} Vouchers for {v['server']} server With Vouchers Printer.",
+        "indicator": "green",
+        "title": "Created Vouchers",
+		"name_doc":  doc.name,
     })
-    return True
+    return vouchers
 
 # FOR TESTING
 def printData(date,name=None):

@@ -9,6 +9,7 @@
  "field_order": [
   "voucher",
   "server",
+  "limit_uptime",
   "url"
  ],
  "fields": [
@@ -29,12 +30,18 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "URL"
+  },
+  {
+   "fieldname": "limit_uptime",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Limit Uptime"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-04-07 15:52:53.174822",
+ "modified": "2024-04-17 13:32:39.960837",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers Table",
