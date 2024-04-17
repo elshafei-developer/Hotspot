@@ -8,10 +8,11 @@
  "field_order": [
   "name1",
   "status",
-  "limit_uptime",
+  "uptime",
   "column_break_qhyg",
   "server",
-  "uptime",
+  "limit_uptime",
+  "section_break_djgn",
   "url"
  ],
  "fields": [
@@ -44,8 +45,6 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Active\nInactive"
@@ -63,12 +62,16 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "URL"
+  },
+  {
+   "fieldname": "section_break_djgn",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2024-04-15 15:14:52.356501",
+ "modified": "2024-04-17 17:17:07.929075",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers",

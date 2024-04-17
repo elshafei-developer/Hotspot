@@ -60,7 +60,7 @@ frappe.listview_settings["Vouchers"] = {
                 reqd: 1,
               },
               {
-                label: "Create Print",
+                label: "Create Vouchers Printer",
                 fieldname: "create_print",
                 fieldtype: "Check",
               },
@@ -157,11 +157,12 @@ frappe.realtime.on(
   "realtime_vouchers_printer",
   (r) => {
     frappe.show_alert({
-      message: __(r.message + "{0}", [
+      message: __("{0}", [
         '<a href="/app/vouchers-printer/' +
           r.name_doc +
           '">' +
-          "<b>View</b>" +
+          r.message +
+          "<b>Click for View</b>" +
           "</a>",
       ]),
       indicator: "green",

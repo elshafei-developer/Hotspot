@@ -4,12 +4,12 @@ from frappe.model.document import Document
 from frappe import json
 import frappe.realtime
 from frappe.utils import random_string
+import frappe.utils
 import requests
 
 class Vouchers(Document):
 
     def db_insert(self, *args, **kwargs):
-        self.queue_action('insert')
         insert_voucher(self.as_dict())
 
     def db_update(self, *args, **kwargs):
@@ -79,12 +79,21 @@ def get_vouchers(filters):
 			return vouchers_filter
 def get_voucher(voucher):
 	info_voucher = connect_hotspot('GET',voucher)
+	
+	comment = info_voucher['comment']
+	comment_fixed = comment.replace("'", "\"")
+	comment_object = json.loads(comment_fixed)
+	
 	hotspot_controller = frappe.get_doc('Hotspot Controller')
 	info_voucher['url'] = hotspot_controller.get_server_url(info_voucher['server']) if 'server' in info_voucher else 'http://localhost'
 	info_voucher['server'] = hotspot_controller.get_name(info_voucher['server']) if 'server' in info_voucher else 'الكل'
 	info_voucher['name1'] = info_voucher['name']
 	info_voucher['status'] = 'Active' if info_voucher['disabled'] == 'false' else 'Inactive'
 	info_voucher['limit_uptime'] = hotspot_controller.get_limit_uptime_name(info_voucher['limit-uptime']) if 'limit-uptime' in info_voucher else None
+	info_voucher['owner'] = comment_object['owner'] if 'owner' in comment_object else 'not known'
+	info_voucher['creation'] = comment_object['creation'] if 'creation' in comment_object else None
+	info_voucher['modified'] = comment_object['modified'] if 'modified' in comment_object else None
+	info_voucher['modified_by'] = comment_object['modified_by'] if 'modified_by' in comment_object else 'not known'
 	return info_voucher
 
 def insert_voucher(data):
@@ -110,12 +119,19 @@ def voucher_exists(new_name,old_name=None):
 def voucher_structure(data):
 	hotspot_controller = frappe.get_doc('Hotspot Controller')
 	time = hotspot_controller.get_limit_uptime(data['limit_uptime']) if data['limit_uptime'] else '00:00:00'
-	
+	printData(data,'data all')
+	comment = {
+		"owner": data['owner'] if 'owner' in data else frappe.session.user,
+		"creation": data['creation'] if 'creation' in data else frappe.utils.now_datetime().strftime('%Y-%m-%d %H:%M:%S'),
+		"modified": data['modified'] if 'modified' in data else frappe.utils.now_datetime().strftime('%Y-%m-%d %H:%M:%S'),
+		"modified_by": data['modified_by'] if 'modified_by' in data else frappe.session.user,
+    }
 	return {
 		"name": data['name1'].replace(' ','_'),
 		'disabled': 'false' if data['status'] == 'Active' else 'true',
 		'server': hotspot_controller.get_server(data['server']) if data['server'] != 'الكل' else 'all',
 		'limit-uptime':  convert_time_format(time),
+		"comment": f"{comment}",
 	}
 
 def convert_time_format(time_str):
@@ -259,7 +275,6 @@ def delete_inactive_vouchers():
 
 @frappe.whitelist()
 def crete_vouchers_background(number_vouchers,server,limit_uptime,create_print):
-    printData(create_print,'create_print')
     if create_print == 'true':
         frappe.enqueue(create_vouchers_with_print,number_vouchers=number_vouchers,server=server,limit_uptime=limit_uptime)
     else:
