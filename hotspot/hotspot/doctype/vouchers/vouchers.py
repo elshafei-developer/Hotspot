@@ -8,6 +8,9 @@ import frappe.utils
 import requests
 
 class Vouchers(Document):
+	
+    # def GET_vouchers(self):
+    #     return GET()
 
     def db_insert(self, *args, **kwargs):
         insert_voucher(self.as_dict())
@@ -17,7 +20,6 @@ class Vouchers(Document):
         self.modified = False
 
     def update(self, *args, **kwargs):
-        # update_voucher(self.name, self.as_dict())
         return super().update(*args)
 
     def before_rename(self, old, new, merge=False):
@@ -33,9 +35,17 @@ class Vouchers(Document):
 
     @staticmethod
     def get_list(args):
-        vouchers = get_vouchers(args.filters)
+        vouchers = get_vouchers(args)
         if args.get('as_list'):
             return [tuple(voucher.values()) for voucher in vouchers]
+        if args.get('user'):
+            owners = {}
+            for voucher in vouchers:
+                owner = voucher['owner']
+                owners[owner] = owners.get(owner, 0) + 1
+            result = [{'name': owner, 'count': count} for owner, count in owners.items()]
+            return result
+        # else:
         return vouchers
 
     @staticmethod
@@ -47,7 +57,8 @@ class Vouchers(Document):
 
 ### FUNCTIONS ###
 @frappe.whitelist()
-def get_vouchers(filters):
+def get_vouchers(args):
+	filters = args.get('filters',[])
 	vouchers = connect_hotspot('GET')
 	if vouchers == False:
 		frappe.throw(_(f"Error: The hotspot controller is disconnected."))
@@ -60,6 +71,10 @@ def get_vouchers(filters):
 							'limit_uptime':hotspot_controller.get_limit_uptime_name(v['limit-uptime']) if 'limit-uptime' in v else '00:00:00',
                             'server': hotspot_controller.get_name(v['server']) if 'server' in v else 'الكل',
 							'url': hotspot_controller.get_server_url(v['server']) if 'server' in v else 'http://localhost',
+							"comment": json.loads(v['comment'].replace("'", "\""))['owner'] if 'comment' in v else 'not known',
+							"owner": json.loads(v['comment'].replace("'", "\""))['owner'] if 'comment' in v else 'not known',
+							"create_by": json.loads(v['comment'].replace("'", "\""))['owner'] if 'comment' in v else 'not known',
+							# "owner": json.loads(v['comment'])['owner'] if 'comment' in v else 'not known',
 							}
 		vouchers_map = list(map(data_map, vouchers))
 		if filters == []:
@@ -70,19 +85,25 @@ def get_vouchers(filters):
 				if 'status' in f:
 					status_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
 					vouchers_filter = status_filter
+					break
 				if 'limit_uptime' in f:
 					limit_uptime_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
 					vouchers_filter = limit_uptime_filter
+					break
 				if 'server' in f:
 					server_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
 					vouchers_filter = server_filter
+					break
+				if 'owner' in f:
+					owner_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
+					vouchers_filter = owner_filter
+					break
 			return vouchers_filter
 def get_voucher(voucher):
 	info_voucher = connect_hotspot('GET',voucher)
 	
-	comment = info_voucher['comment']
-	comment_fixed = comment.replace("'", "\"")
-	comment_object = json.loads(comment_fixed)
+	comment = info_voucher['comment'] if 'comment' in info_voucher else '{}'
+	comment_object = json.loads(comment.replace("'", "\""))
 	
 	hotspot_controller = frappe.get_doc('Hotspot Controller')
 	info_voucher['url'] = hotspot_controller.get_server_url(info_voucher['server']) if 'server' in info_voucher else 'http://localhost'
@@ -119,7 +140,6 @@ def voucher_exists(new_name,old_name=None):
 def voucher_structure(data):
 	hotspot_controller = frappe.get_doc('Hotspot Controller')
 	time = hotspot_controller.get_limit_uptime(data['limit_uptime']) if data['limit_uptime'] else '00:00:00'
-	printData(data,'data all')
 	comment = {
 		"owner": data['owner'] if 'owner' in data else frappe.session.user,
 		"creation": data['creation'] if 'creation' in data else frappe.utils.now_datetime().strftime('%Y-%m-%d %H:%M:%S'),
