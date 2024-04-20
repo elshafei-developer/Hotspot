@@ -55,22 +55,23 @@ class Vouchers(Document):
 
 ### FUNCTIONS ###
 def get_vouchers(args):
+	if frappe.cache.get_value('voucher_cache'):
+		vouchers =  frappe.cache.get_value('voucher_cache')
+	else:
+		vouchers = connect_hotspot('GET')
 	filters = args.get('filters',[])
-	vouchers = connect_hotspot('GET')
+	# vouchers = connect_hotspot('GET')
 	if vouchers == False:
 		frappe.throw(_(f"Error: The hotspot controller is disconnected."))
 	else:
 		vouchers.pop(0)
-		order_by = args.get('order_by')
-		# order_by = args.get('order_by')
+		order_by = args.get('order_by','desc')
 		pattern = r'`tabVouchers`\.`(\w+)`\s+(desc|asc)'
 		match = re.search(pattern, order_by)
-		printData(order_by,'Order By')
 		if match:
 			order_key = match.group(1)
 		else:
-			order_key = None
-		printData(order_by,'Match')    
+			order_key = 'name'
 		vouchers_map = sorted(list(map(data_map(), vouchers)), key=lambda x: x[order_key], reverse=True if 'desc' in order_by else False)
 		if filters == []:
 			return vouchers_map
@@ -85,7 +86,7 @@ def get_voucher(voucher):
 	info_voucher['name1'] = info_voucher['name']
 	info_voucher['status'] = 'Active' if info_voucher['disabled'] == 'false' else 'Inactive'
 	info_voucher['limit_uptime'] = hotspot_controller.get_limit_uptime_name(info_voucher['limit-uptime']) if 'limit-uptime' in info_voucher else None
-	info_voucher['owner'] = comment['owner'] 
+	info_voucher['owner'] = comment['owner']
 	info_voucher['create_by'] = comment['owner'] 
 	info_voucher['creation'] = comment['creation']
 	info_voucher['modified'] = comment['modified']
@@ -227,6 +228,7 @@ def GET(ip,admin,password,name=None):
 		try:
 			api = requests.request("GET",f"https://{ip}/rest/ip/hotspot/user",auth=(admin,password),verify=False)
 			if api.status_code == 200:
+				frappe.cache().set_value('voucher_cache', api.json())
 				return api.json()
 			else:
 				frappe.throw(_(f"Error: {api.status_code}"))
@@ -242,6 +244,7 @@ def PUT(ip,admin,password,data):
 	try:
 		api = requests.request("PUT",f"https://{ip}/rest/ip/hotspot/user",auth=(admin,password),json=data,verify=False)
 		if api.status_code == 201:
+			frappe.cache.delete_value('voucher_cache')
 			return True
 		else:
 			if api.status_code == 400:
@@ -259,6 +262,7 @@ def DELETE(ip,admin,password,voucher):
 	try:
 		api = requests.request("DELETE",f"https://{ip}/rest/ip/hotspot/user/{voucher}",auth=(admin,password),verify=False)
 		if api.status_code == 204:
+			frappe.cache.delete_value('voucher_cache')
 			return True
 		else:
 			frappe.throw(_(f"Error: {api.status_code}"))
@@ -274,6 +278,7 @@ def PATCH(ip,admin,password,data,voucher):
 	try:
 		api = requests.request("PATCH",f"https://{ip}/rest/ip/hotspot/user/{voucher}",auth=(admin,password),verify=False,json=data)
 		if api.status_code == 200:
+			frappe.cache.delete_value('voucher_cache')
 			return True
 		else:
 			if api.status_code == 400:
