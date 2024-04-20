@@ -6,11 +6,10 @@ import frappe.realtime
 from frappe.utils import random_string
 import frappe.utils
 import requests
+import re
+
 
 class Vouchers(Document):
-	
-    # def GET_vouchers(self):
-    #     return GET()
 
     def db_insert(self, *args, **kwargs):
         insert_voucher(self.as_dict())
@@ -55,7 +54,6 @@ class Vouchers(Document):
         return {}
 
 ### FUNCTIONS ###
-@frappe.whitelist()
 def get_vouchers(args):
 	filters = args.get('filters',[])
 	vouchers = connect_hotspot('GET')
@@ -63,7 +61,17 @@ def get_vouchers(args):
 		frappe.throw(_(f"Error: The hotspot controller is disconnected."))
 	else:
 		vouchers.pop(0)
-		vouchers_map = list(map(data_map(), vouchers))
+		order_by = args.get('order_by')
+		# order_by = args.get('order_by')
+		pattern = r'`tabVouchers`\.`(\w+)`\s+(desc|asc)'
+		match = re.search(pattern, order_by)
+		printData(order_by,'Order By')
+		if match:
+			order_key = match.group(1)
+		else:
+			order_key = None
+		printData(order_by,'Match')    
+		vouchers_map = sorted(list(map(data_map(), vouchers)), key=lambda x: x[order_key], reverse=True if 'desc' in order_by else False)
 		if filters == []:
 			return vouchers_map
 		else:
@@ -80,22 +88,17 @@ def get_voucher(voucher):
 	info_voucher['owner'] = comment['owner'] 
 	info_voucher['create_by'] = comment['owner'] 
 	info_voucher['creation'] = comment['creation']
-	info_voucher['creation1'] = comment['creation']
 	info_voucher['modified'] = comment['modified']
 	info_voucher['modified_by'] = comment['modified_by']
 	return info_voucher
-
 def insert_voucher(data):
 	data = voucher_structure(data)
 	connect_hotspot('PUT',data)
-
 def update_voucher(voucher,data):
 	data = voucher_structure(data)
 	connect_hotspot('PATCH',data,voucher)
-
 def delete_voucher(voucher):
 	connect_hotspot('DELETE',voucher)
-
 def voucher_exists(new_name,old_name=None):
 	vouchers = connect_hotspot('GET')
 	vouchers_exists = list(map(lambda x: x['name'], vouchers))
@@ -103,11 +106,13 @@ def voucher_exists(new_name,old_name=None):
 		vouchers_exists.pop(vouchers_exists.index(old_name))
 	if new_name in vouchers_exists:
 		frappe.throw(_(f"Error: The voucher '{new_name}' already exists."))
-
 def data_map():
     hotspot_controller = frappe.get_doc('Hotspot Controller')
 
-    data_map = lambda v: {'name':v['name'],
+    data_map = lambda v: {
+                    'name':v['name'],
+                    'name1':v['name'],
+                    'idx':v['.id'],
                     'status': 'Active' if v['disabled'] == 'false' else 'Inactive',
                     'uptime': v['uptime'],
                     'limit_uptime':hotspot_controller.get_limit_uptime_name(v['limit-uptime']) if 'limit-uptime' in v else '00:00:00',
@@ -116,9 +121,10 @@ def data_map():
                     "owner": comment_Mikrotik_structure(v)['owner'],
                     "create_by": comment_Mikrotik_structure(v)['owner'],
 					"creation1" : comment_Mikrotik_structure(v)['creation'],
+					"creation" : comment_Mikrotik_structure(v)['creation'],
+					"modified" : comment_Mikrotik_structure(v)['modified'],
                     }
     return data_map
-
 def comment_Mikrotik_structure(voucher):
     comment = voucher['comment'] if 'comment' in voucher else '{}'
     try:
@@ -136,7 +142,6 @@ def comment_Mikrotik_structure(voucher):
             'modified': 0,
             'modified_by': 'Hotspot',
         }
-
 def filters_vouchers(filters,vouchers_map):
         vouchers_filter = vouchers_map
         for f in filters:
@@ -161,9 +166,10 @@ def filters_vouchers(filters,vouchers_map):
                 vouchers_filter = owner_filter
                 continue
         return vouchers_filter
-
-# structure of voucher that MikroTik Accept
 def voucher_structure(data):
+	"""
+	structure of voucher that MikroTik Accept
+	"""
 	hotspot_controller = frappe.get_doc('Hotspot Controller')
 	time = hotspot_controller.get_limit_uptime(data['limit_uptime']) if data['limit_uptime'] else '00:00:00'
 	comment = {
@@ -180,7 +186,6 @@ def voucher_structure(data):
 		'limit-uptime':  convert_time_format(time),
 		"comment": f"{comment}",
 	}
-
 def convert_time_format(time_str):
     parts = str(time_str).split(':')
     hours = int(parts[0])
