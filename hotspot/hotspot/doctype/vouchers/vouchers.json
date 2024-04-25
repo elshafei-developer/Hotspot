@@ -9,9 +9,11 @@
   "name1",
   "status",
   "uptime",
+  "bytes_out",
   "column_break_qhyg",
   "server",
   "limit_uptime",
+  "bytes_in",
   "section_break_djgn",
   "url"
  ],
@@ -66,12 +68,26 @@
   {
    "fieldname": "section_break_djgn",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "bytes_out",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Bytes out",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bytes_in",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Bytes in",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2024-04-18 18:07:46.673570",
+ "modified": "2024-04-25 15:39:18.999687",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers",

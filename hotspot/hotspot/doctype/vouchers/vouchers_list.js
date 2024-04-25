@@ -15,6 +15,35 @@ frappe.listview_settings["Vouchers"] = {
     },
   },
   onload: function (listview) {
+    listview.page.add_inner_button(
+      "Refresh",
+      () => {
+        frappe
+          .call("hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache")
+          .then((r) => {
+            listview.refresh();
+            console.log(r.message);
+            if (r.message == true) {
+              frappe.show_alert(
+                {
+                  message: __("Refreshed"),
+                  indicator: "green",
+                },
+                7
+              );
+            } else {
+              frappe.show_alert(
+                {
+                  message: __("Error"),
+                  indicator: "red",
+                },
+                7
+              );
+            }
+          });
+      },
+      "Actions"
+    );
     frappe
       .call(
         "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_info_table"
@@ -69,7 +98,7 @@ frappe.listview_settings["Vouchers"] = {
             primary_action(values) {
               frappe.call({
                 method:
-                  "hotspot.hotspot.doctype.vouchers.vouchers.crete_vouchers_background",
+                  "hotspot.hotspot.doctype.vouchers.action_hotspot.crete_vouchers_background",
                 args: {
                   number_vouchers: values.number_voucher,
                   server: values.server,
@@ -92,7 +121,7 @@ frappe.listview_settings["Vouchers"] = {
           });
           frappe.call({
             method:
-              "hotspot.hotspot.doctype.vouchers.vouchers.create_printer_voucher",
+              "hotspot.hotspot.doctype.vouchers.action_hotspot.create_printer_voucher",
             args: {
               vouchers: vouchers,
             },
@@ -122,7 +151,7 @@ frappe.listview_settings["Vouchers"] = {
             frappe
               .call({
                 method:
-                  "hotspot.hotspot.doctype.vouchers.vouchers.delete_inactive_vouchers_background",
+                  "hotspot.hotspot.doctype.vouchers.action_hotspot.delete_inactive_vouchers_background",
                 callback: function (r) {
                   if (r.message) {
                     frappe.msgprint(r.message);
@@ -141,9 +170,9 @@ frappe.listview_settings["Vouchers"] = {
     );
   },
 };
+
 frappe.realtime.on("realtime_vouchers", (data) => {
   cur_list.refresh();
-  //   cur_list.reload_doc();
   frappe.show_alert(
     {
       message: __(data.message),
@@ -156,6 +185,7 @@ frappe.realtime.on("realtime_vouchers", (data) => {
 frappe.realtime.on(
   "realtime_vouchers_printer",
   (r) => {
+    cur_list.refresh();
     frappe.show_alert({
       message: __("{0}", [
         '<a href="/app/vouchers-printer/' +
