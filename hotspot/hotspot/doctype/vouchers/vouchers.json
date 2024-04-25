@@ -73,21 +73,21 @@
    "fieldname": "bytes_out",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Bytes out",
+   "label": "Upload",
    "read_only": 1
   },
   {
    "fieldname": "bytes_in",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Bytes in",
+   "label": "Download",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2024-04-25 15:39:18.999687",
+ "modified": "2024-04-25 17:03:36.632032",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers",

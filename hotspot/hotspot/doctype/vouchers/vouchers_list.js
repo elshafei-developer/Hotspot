@@ -15,35 +15,32 @@ frappe.listview_settings["Vouchers"] = {
     },
   },
   onload: function (listview) {
-    listview.page.add_inner_button(
-      "Refresh",
-      () => {
-        frappe
-          .call("hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache")
-          .then((r) => {
-            listview.refresh();
-            console.log(r.message);
-            if (r.message == true) {
-              frappe.show_alert(
-                {
-                  message: __("Refreshed"),
-                  indicator: "green",
-                },
-                7
-              );
-            } else {
-              frappe.show_alert(
-                {
-                  message: __("Error"),
-                  indicator: "red",
-                },
-                7
-              );
-            }
-          });
-      },
-      "Actions"
-    );
+    // clear cache
+    frappe.call("hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache");
+    listview.refresh_button.on("click", () => {
+      frappe
+        .call("hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache")
+        .then((r) => {
+          location.reload();
+          if (r.message == true) {
+            frappe.show_alert(
+              {
+                message: __("Refreshed"),
+                indicator: "green",
+              },
+              7
+            );
+          } else {
+            frappe.show_alert(
+              {
+                message: __("Error"),
+                indicator: "red",
+              },
+              7
+            );
+          }
+        });
+    });
     frappe
       .call(
         "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_info_table"
@@ -182,21 +179,21 @@ frappe.realtime.on("realtime_vouchers", (data) => {
     7
   );
 });
-frappe.realtime.on(
-  "realtime_vouchers_printer",
-  (r) => {
-    cur_list.refresh();
-    frappe.show_alert({
-      message: __("{0}", [
-        '<a href="/app/vouchers-printer/' +
-          r.name_doc +
-          '">' +
-          r.message +
-          "<b>Click for View</b>" +
-          "</a>",
-      ]),
-      indicator: "green",
-    });
-  },
-  7
-);
+frappe.realtime.on("realtime_vouchers_printer", (r) => {
+  cur_list.refresh();
+  frappe.show_alert({
+    message: __("{0}", [
+      '<a href="/app/vouchers-printer/' +
+        r.name_doc +
+        '">' +
+        r.message +
+        "<b>Click for View</b>" +
+        "</a>",
+    ]),
+    indicator: "green",
+  });
+});
+7;
+clear_data = () => {
+  frappe.ui.toolbar.clear_cache();
+};

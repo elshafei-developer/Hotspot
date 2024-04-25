@@ -1,7 +1,9 @@
 import frappe
 from frappe import _
 import requests
-from frappe.utils.data import today
+from frappe.utils.data import now
+# import urllib3
+# urllib3.disable_warnings()
 
 ### REST API ###
 def connect_hotspot(method,data=None,voucher=None):
@@ -33,6 +35,7 @@ def GET(ip,admin,password,name=None):
 			return False
 	else:
 		try:
+			print(f"===={now()}====")
 			api = requests.request("GET",f"https://{ip}/rest/ip/hotspot/user",auth=(admin,password),verify=False)
 			if api.status_code == 200:
 				frappe.cache.set_value(f'hotspot{ip}', api.json(), expires_in_sec=3600)

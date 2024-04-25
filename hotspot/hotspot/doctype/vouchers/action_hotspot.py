@@ -93,16 +93,17 @@ def create_vouchers_with_print(number_vouchers,server,limit_uptime):
     for v in list(vouchers):
             name = v['name1'].replace(' ','_')
             server = hotspot_controller.get_server(v['server'])
+            server_name = v['server']
             url = hotspot_controller.get_server_url(server)
             doc.append('vouchers_table', {
                 'voucher': name,
-                'server': v['server'],
+                'server':server_name,
                 'url':url,
                 "limit_uptime": limit_uptime,
             })
     doc.insert()
     frappe.publish_realtime("realtime_vouchers_printer", {
-        "message": f"Successfully Created {number_vouchers} Vouchers for MMM server With Vouchers Printer.",
+        "message": f"Successfully Created {number_vouchers} Vouchers for {server_name} server With Vouchers Printer.",
         "indicator": "green",
         "title": "Created Vouchers",
 		"name_doc":  doc.name,
