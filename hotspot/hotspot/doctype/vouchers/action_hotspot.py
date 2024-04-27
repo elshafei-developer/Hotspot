@@ -26,21 +26,26 @@ def create_printer_voucher(vouchers):
 def delete_inactive_vouchers_background():
     frappe.enqueue(delete_inactive_vouchers)
 def delete_inactive_vouchers():
-	frappe.publish_realtime("realtime_vouchers", {
-		"message": f"Will delete all inactive vouchers...",
-		"indicator": "blue",
-		"title": "Deleting Inactive Vouchers",
+    frappe.publish_realtime("realtime_vouchers", {
+        "message": f"Will delete all inactive vouchers...",
+        "indicator": "blue",
+        "title": "Deleting Inactive Vouchers",
     })
-	all_vouchers = connect_hotspot("GET")
-	(all_vouchers,"All Vouchers")
-	inactive_vouchers = list(filter(lambda x: x['disabled'] == 'true', all_vouchers))
-
-	for voucher in inactive_vouchers:
-		connect_hotspot("DELETE",voucher['name'])
-	frappe.publish_realtime("realtime_vouchers", {
-		"message": f"Successfully Deleted All Inactive Vouchers",
-		"indicator": "green",
-		"title": "Deleted Inactive Vouchers",
+    all_vouchers = connect_hotspot("GET")
+    inactive_vouchers = list(filter(lambda x: x['disabled'] == 'true', all_vouchers))
+    if len(inactive_vouchers) == 0:
+        frappe.publish_realtime("realtime_vouchers", {
+            "message": f"No Inactive Vouchers Found",
+            "indicator": "green",
+            "title": "No Inactive Vouchers",
+        })
+        return False
+    for voucher in inactive_vouchers:
+        connect_hotspot("DELETE",voucher['name'])
+    frappe.publish_realtime("realtime_vouchers", {
+        "message": f"Successfully Deleted All Inactive Vouchers",
+        "indicator": "green",
+        "title": "Deleted Inactive Vouchers",
     })
 
 
@@ -114,6 +119,7 @@ def create_vouchers_with_print(number_vouchers,server,limit_uptime):
 def clear_cache():
     hotspot_controller = frappe.get_doc('Hotspot Controller')
     ip = hotspot_controller.ip
+    print("CEARE CHACHE")
     frappe.cache.delete_value(f'hotspot{ip}')
     return True
 

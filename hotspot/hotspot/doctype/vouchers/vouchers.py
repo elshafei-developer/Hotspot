@@ -3,7 +3,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe import json
 import re
-from datetime import datetime
 from .rest_api_hotspot import connect_hotspot
 
 class Vouchers(Document):
@@ -122,7 +121,6 @@ def filters_vouchers(filters,vouchers_map):
                 continue
         return vouchers_filter
 
-### BACKGROUND JOB ###
 ### FUNCTION ###
 def data_map():
     hotspot_controller = frappe.get_doc('Hotspot Controller')

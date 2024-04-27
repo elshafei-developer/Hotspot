@@ -1,9 +1,3 @@
-frappe.assets = {
-  clear_local_storage() {
-    frappe.call("hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache");
-  },
-};
-
 frappe.listview_settings["Vouchers"] = {
   hide_name_filter: true,
   get_indicator(doc) {
@@ -21,14 +15,13 @@ frappe.listview_settings["Vouchers"] = {
     },
   },
   onload: function (listview) {
-    console.log(listview);
-    console.log(listview);
-    // listview.refresh_button.on("click", () => {
-    //   frappe.call(
-    //     "hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache"
-    //   );
-    //   location.reload();
-    // });
+    listview.refresh_button.on("click", () => {
+      frappe
+        .call("hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache")
+        .then((r) => {
+          listview.refresh();
+        });
+    });
     frappe
       .call(
         "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_info_table"
