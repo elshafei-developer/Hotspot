@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_rename": 1,
  "autoname": "format:{name1}",
  "creation": "2024-03-09 17:53:38.156405",
  "doctype": "DocType",
@@ -87,7 +86,7 @@
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2024-04-25 17:03:36.632032",
+ "modified": "2024-04-27 15:15:21.693339",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Vouchers",

@@ -12,14 +12,11 @@ class Vouchers(Document):
         insert_voucher(self.as_dict())
 
     def db_update(self, *args, **kwargs):
-        update_voucher(self.name, self.as_dict())
         self.modified = False
+        update_voucher(self.name, self.as_dict())
 
     def update(self, *args, **kwargs):
         return super().update(*args)
-
-    def before_rename(self, old, new, merge=False):
-        frappe.throw(_(f"Error: Can not Rename From Here."))
 
     def delete(args):
         delete_voucher(args.name)
@@ -32,7 +29,6 @@ class Vouchers(Document):
     @staticmethod
     def get_list(args):
         vouchers = get_vouchers(args)
-        time = datetime.now().time()
         if args.get('as_list'):
             return [tuple(voucher.values()) for voucher in vouchers]
         if args.get('user'):
@@ -193,13 +189,3 @@ def comment_Mikrotik_structure(voucher):
             'modified': 0,
             'modified_by': 'Hotspot',
         }
-
-# FOR TESTING
-def printData(date,name=None):
-	print('\n')
-	print("*"*20)
-	if name:
-		print(name)
-	print(date)
-	print("*"*20)
-	print('\n')

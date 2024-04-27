@@ -1,3 +1,9 @@
+frappe.assets = {
+  clear_local_storage() {
+    frappe.call("hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache");
+  },
+};
+
 frappe.listview_settings["Vouchers"] = {
   hide_name_filter: true,
   get_indicator(doc) {
@@ -15,32 +21,14 @@ frappe.listview_settings["Vouchers"] = {
     },
   },
   onload: function (listview) {
-    // clear cache
-    frappe.call("hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache");
-    listview.refresh_button.on("click", () => {
-      frappe
-        .call("hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache")
-        .then((r) => {
-          location.reload();
-          if (r.message == true) {
-            frappe.show_alert(
-              {
-                message: __("Refreshed"),
-                indicator: "green",
-              },
-              7
-            );
-          } else {
-            frappe.show_alert(
-              {
-                message: __("Error"),
-                indicator: "red",
-              },
-              7
-            );
-          }
-        });
-    });
+    console.log(listview);
+    console.log(listview);
+    // listview.refresh_button.on("click", () => {
+    //   frappe.call(
+    //     "hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache"
+    //   );
+    //   location.reload();
+    // });
     frappe
       .call(
         "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_info_table"
@@ -193,7 +181,6 @@ frappe.realtime.on("realtime_vouchers_printer", (r) => {
     indicator: "green",
   });
 });
-7;
-clear_data = () => {
-  frappe.ui.toolbar.clear_cache();
-};
+frappe.realtime.on("realtime_vouchers_deleted", (r) => {
+  cur_list.refresh();
+});

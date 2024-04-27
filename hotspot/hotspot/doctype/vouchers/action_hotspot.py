@@ -91,7 +91,7 @@ def create_vouchers_with_print(number_vouchers,server,limit_uptime):
         insert_voucher(data)
     doc = frappe.new_doc('Vouchers Printer')
     for v in list(vouchers):
-            name = v['name1'].replace(' ','_')
+            name = v['name1'].replace(' ','_')    
             server = hotspot_controller.get_server(v['server'])
             server_name = v['server']
             url = hotspot_controller.get_server_url(server)
@@ -116,6 +116,7 @@ def clear_cache():
     ip = hotspot_controller.ip
     frappe.cache.delete_value(f'hotspot{ip}')
     return True
+
 ## FUNCTION ##
 def voucher_structure(data):
 	"""
