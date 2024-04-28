@@ -1,26 +1,18 @@
 import frappe
 from frappe import _
 import requests
-from frappe.utils.data import now
-import certifi
-# import urllib3
-# urllib3.disable_warnings()
-
-### REST API ###
 def connect_hotspot(method,data=None,voucher=None):
 	hotspot_controller = frappe.get_doc('Hotspot Controller')
 	ip = hotspot_controller.ip
-	admin = hotspot_controller.user
-	password = hotspot_controller.password
 
 	if method == 'GET':
-		return GET(ip,admin,password,data)
+		return GET(ip,data)
 	if method == 'PUT':
-		return PUT(ip,admin,password,data)
+		return PUT(ip,data)
 	if method == 'DELETE':
-		return DELETE(ip,admin,password,data)
+		return DELETE(ip,data)
 	if method == 'PATCH':
-		return PATCH(ip,admin,password,data,voucher)
+		return PATCH(ip,data,voucher)
 
 def url(method,url,data=None):
     hotspot_controller = frappe.get_doc('Hotspot Controller')
@@ -31,10 +23,9 @@ def url(method,url,data=None):
         return requests.request(method,f"https://{ip}/{url}",auth=(admin,password),json=data,verify=False)
     return requests.request(method,f"https://{ip}/{url}",auth=(admin,password),verify=False)
 
-def GET(ip,admin,password,name=None):
+def GET(ip,name=None):
 	if name:
 		try:
-			# api = requests.request("GET",f"https://{ip}/rest/ip/hotspot/user/{name}",auth=(admin,password),verify=False)
 			api = url("GET",f"rest/ip/hotspot/user/{name}")
 			if api.status_code == 200:
 				return api.json()
@@ -46,12 +37,11 @@ def GET(ip,admin,password,name=None):
 			return False
 	else:
 		try:
-			print(f"===={now()}====")
-			# api = requests.request("GET",f"https://{ip}/rest/ip/hotspot/user",auth=(admin,password),verify=False )
 			api = url("GET","rest/ip/hotspot/user")
 			if api.status_code == 200:
-				frappe.cache.set_value(f'hotspot{ip}', api.json(), expires_in_sec=3600)
-				return api.json()
+				filtered_data = [item for item in api.json() if item.get('dynamic') == 'false']
+				frappe.cache.set_value(f'hotspot{ip}', filtered_data, expires_in_sec=3600)
+				return filtered_data
 			else:
 				frappe.throw(_(f"Error: {api.status_code}"))
 				return False
@@ -59,12 +49,11 @@ def GET(ip,admin,password,name=None):
 			frappe.throw(_(f"Error: => Hotspot Controller is disconnected."))
 			return False
 
-def PUT(ip,admin,password,data):
+def PUT(ip,data):
 	if data == None:
 		frappe.throw(_(f"Error: The voucher could not be created Empty."))
 	voucher_exists(data['name'])
 	try:
-		# api = requests.request("PUT",f"https://{ip}/rest/ip/hotspot/user",auth=(admin,password),json=data,verify=False)
 		api = url("PUT","rest/ip/hotspot/user",data)
 		if api.status_code == 201:
 			frappe.cache.delete_value(f'hotspot{ip}')
@@ -79,15 +68,14 @@ def PUT(ip,admin,password,data):
 		frappe.throw(_(f"Error: => {e}"))
 		return False
 
-def DELETE(ip,admin,password,voucher):
+def DELETE(ip,voucher):
 	if voucher == None:
 		frappe.throw(_(f"Error: A name Voucher must be given to delete the Voucher"))
 	try:
-		# api = requests.request("DELETE",f"https://{ip}/rest/ip/hotspot/user/{voucher}",auth=(admin,password),verify=False)
 		api = url("DELETE",f"rest/ip/hotspot/user/{voucher}")
 		if api.status_code == 204:
 			frappe.cache.delete_value(f'hotspot{ip}')
-			frappe.publish_realtime("realtime_vouchers_deleted")
+			frappe.publish_realtime("realtime_vouchers",{"message":"delete"})
 			return True
 		else:
 			frappe.throw(_(f"Error: {api.status_code}"))
@@ -96,12 +84,11 @@ def DELETE(ip,admin,password,voucher):
 		frappe.throw(_(f"Error: => {e}"))
 		return False
 
-def PATCH(ip,admin,password,data,voucher):
+def PATCH(ip,data,voucher):
 	if voucher == None:
 		frappe.throw(_(f"Error: A name must be given to Update the Voucher"))
 	voucher_exists(data['name'],voucher)
 	try:
-		# api = requests.request("PATCH",f"https://{ip}/rest/ip/hotspot/user/{voucher}",auth=(admin,password),verify=False,json=data)
 		api = url("PATCH",f"rest/ip/hotspot/user/{voucher}",data)
 		if api.status_code == 200:
 			frappe.cache.delete_value(f'hotspot{ip}')
