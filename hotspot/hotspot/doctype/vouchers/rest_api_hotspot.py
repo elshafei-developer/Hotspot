@@ -39,7 +39,7 @@ def GET(ip,name=None):
 		try:
 			api = url("GET","rest/ip/hotspot/user")
 			if api.status_code == 200:
-				filtered_data = [item for item in api.json() if item.get('dynamic') == 'false']
+				filtered_data = [item for item in api.json() if item.get('dynamic') == 'false' and item.get('name') != 'default-trial']
 				frappe.cache.set_value(f'hotspot{ip}', filtered_data, expires_in_sec=3600)
 				return filtered_data
 			else:

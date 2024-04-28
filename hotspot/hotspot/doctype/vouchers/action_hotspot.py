@@ -3,7 +3,9 @@ from frappe import _
 from .rest_api_hotspot import connect_hotspot
 import json
 from frappe.utils import random_string
+
 ### ACTION ###
+
 @frappe.whitelist()
 def create_printer_voucher(vouchers):
 	doc = frappe.new_doc('Vouchers Printer')
@@ -47,7 +49,6 @@ def delete_inactive_vouchers():
         "indicator": "green",
         "title": "Deleted Inactive Vouchers",
     })
-
 
 @frappe.whitelist()
 def crete_vouchers_background(number_vouchers,server,limit_uptime,create_print):
@@ -107,8 +108,8 @@ def create_vouchers_with_print(number_vouchers,server,limit_uptime):
                 "limit_uptime": limit_uptime,
             })
     doc.insert()
-    frappe.publish_realtime("realtime_vouchers_printer", {
-        "message": f"Successfully Created {number_vouchers} Vouchers for {server_name} server With Vouchers Printer.",
+    frappe.publish_realtime("realtime_vouchers", {
+        "message": f'<a href=" vouchers-printer/{doc.name}"> Successfully Created {number_vouchers} Vouchers for {server_name} server With Vouchers Printer  {doc.name} <b>Click for View</b></a>',
         "indicator": "green",
         "title": "Created Vouchers",
 		"name_doc":  doc.name,
