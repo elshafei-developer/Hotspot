@@ -16,6 +16,7 @@ frappe.listview_settings["Vouchers"] = {
   },
   onload: function (listview) {
     listview.refresh_button.on("click", () => {
+      listview.refresh();
       frappe
         .call("hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache")
         .then((r) => {
@@ -150,30 +151,17 @@ frappe.listview_settings["Vouchers"] = {
 };
 
 frappe.realtime.on("realtime_vouchers", (data) => {
-  cur_list.refresh();
-  frappe.show_alert(
-    {
-      message: __(data.message),
-      indicator: data.indicator,
-      title: __(data.title),
-    },
-    7
-  );
-});
-frappe.realtime.on("realtime_vouchers_printer", (r) => {
-  cur_list.refresh();
-  frappe.show_alert({
-    message: __("{0}", [
-      '<a href="/app/vouchers-printer/' +
-        r.name_doc +
-        '">' +
-        r.message +
-        "<b>Click for View</b>" +
-        "</a>",
-    ]),
-    indicator: "green",
-  });
-});
-frappe.realtime.on("realtime_vouchers_deleted", (r) => {
-  cur_list.refresh();
+  if (data.message == "delete") {
+    cur_list.refresh();
+  } else {
+    cur_list.refresh();
+    frappe.show_alert(
+      {
+        message: __(data.message),
+        indicator: data.indicator,
+        title: __(data.title),
+      },
+      7
+    );
+  }
 });
