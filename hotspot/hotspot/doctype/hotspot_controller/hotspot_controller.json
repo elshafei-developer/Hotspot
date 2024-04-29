@@ -29,7 +29,7 @@
   },
   {
    "fieldname": "password",
-   "fieldtype": "Data",
+   "fieldtype": "Password",
    "label": "Password"
   },
   {
@@ -68,7 +68,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-04-25 20:04:00.378705",
+ "modified": "2024-04-29 14:17:11.794108",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Hotspot Controller",

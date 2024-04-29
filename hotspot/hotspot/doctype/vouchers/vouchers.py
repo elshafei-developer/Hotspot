@@ -59,6 +59,8 @@ def get_vouchers(args):
     filters = args.get('filters',[])
     if vouchers == False:
         frappe.throw(_(f"Error: The hotspot controller is disconnected."))
+    if vouchers == "ERROR":
+        frappe.throw(_(f"Error: You are not authorized."))
     else:
         order_by = args.get('order_by','desc')
         pattern = r'`tabVouchers`\.`(\w+)`\s+(desc|asc)'
@@ -149,7 +151,7 @@ def voucher_structure(data):
 		"name": data['name1'].replace(' ','_'),
 		'disabled': 'false' if data['status'] == 'Active' else 'true',
 		'server': hotspot_controller.get_server(data['server']) if data['server'] != 'الكل' else 'all',
-		'limit-uptime':  convert_time_format(time),
+		'limit-uptime':  time,
 		"comment": f"{comment}",
 	}
 def convert_time_format(time_str):

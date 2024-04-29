@@ -1,6 +1,8 @@
 import frappe
 from frappe import _
 import requests
+
+@frappe.whitelist()
 def connect_hotspot(method,data=None,voucher=None):
 	hotspot_controller = frappe.get_doc('Hotspot Controller')
 	ip = hotspot_controller.ip
@@ -18,10 +20,10 @@ def url(method,url,data=None):
     hotspot_controller = frappe.get_doc('Hotspot Controller')
     ip = hotspot_controller.ip
     admin = hotspot_controller.user
-    password = hotspot_controller.password
+    password = hotspot_controller.get_password()
     if data:
-        return requests.request(method,f"https://{ip}/{url}",auth=(admin,password),json=data,verify=False)
-    return requests.request(method,f"https://{ip}/{url}",auth=(admin,password),verify=False)
+        return requests.request(method,f"http://{ip}/{url}",auth=(admin,password),json=data,verify=False)
+    return requests.request(method,f"http://{ip}/{url}",auth=(admin,password),verify=False)
 
 def GET(ip,name=None):
 	if name:
@@ -43,10 +45,11 @@ def GET(ip,name=None):
 				frappe.cache.set_value(f'hotspot{ip}', filtered_data, expires_in_sec=3600)
 				return filtered_data
 			else:
-				frappe.throw(_(f"Error: {api.status_code}"))
-				return False
+                # frappe.throw(_(f"Error: {api.status_code}"))
+				return "ERROR"
 		except requests.exceptions.RequestException as e:
-			frappe.throw(_(f"Error: => Hotspot Controller is disconnected."))
+            # frappe.throw(_(f"Error: => Hotspot Controller is disconnected."))
+			frappe.cache.delete_value(f'hotspot{ip}')
 			return False
 
 def PUT(ip,data):

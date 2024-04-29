@@ -120,7 +120,6 @@ def create_vouchers_with_print(number_vouchers,server,limit_uptime):
 def clear_cache():
     hotspot_controller = frappe.get_doc('Hotspot Controller')
     ip = hotspot_controller.ip
-    print("CEARE CHACHE")
     frappe.cache.delete_value(f'hotspot{ip}')
     return True
 
@@ -142,7 +141,7 @@ def voucher_structure(data):
 		"name": data['name1'].replace(' ','_'),
 		'disabled': 'false' if data['status'] == 'Active' else 'true',
 		'server': hotspot_controller.get_server(data['server']) if data['server'] != 'الكل' else 'all',
-		'limit-uptime':  convert_time_format(time),
+		'limit-uptime': time,
 		"comment": f"{comment}",
 	}
 def convert_time_format(time_str):
