@@ -4,12 +4,8 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils.data import get_time
 from frappe.utils import format_duration
-from frappe.utils import duration_to_seconds
 from frappe.utils import cint
-
-
 
 class HotspotController(Document):
     def get_name(self,server):
@@ -33,12 +29,8 @@ class HotspotController(Document):
         frappe.throw(_(f"Error: The name `{name}` is not found."))
 
     def get_limit_uptime_name(self,duration):
-        # duration =  get_time(duration)
-        print("*"*10)
-        print(duration)
-        print("*"*10)
         for vouchers_times in self.vouchers_times:
-            if vouchers_times.duration == dhms_to_seconds(duration):
+            if vouchers_times.duration == duration_to_seconde(duration):
                 return vouchers_times.name1
         return None
 
@@ -48,7 +40,7 @@ class HotspotController(Document):
                 return hotspot_servers.url
 @frappe.whitelist()
 def get_info_table():
-    hotspot_controller = frappe.get_doc('Hotspot Controller')
+    hotspot_controller = frappe.get_single('Hotspot Controller')
     servers = []
     times = []
 
@@ -56,22 +48,21 @@ def get_info_table():
         servers.append(hotspot_servers.name1)
     for vouchers_times in hotspot_controller.vouchers_times:
         times.append(vouchers_times.name1)
-    obj = {
+    return {
         "servers":servers,
         "times":times
     }
-    return obj
 
 @frappe.whitelist()
 def get_server_details(server):
-    hotspot_controller = frappe.get_doc('Hotspot Controller')
+    hotspot_controller = frappe.get_single('Hotspot Controller')
     if server == 'الكل':
         return 'http://localhost'
     for hotspot_servers in hotspot_controller.hotspot_servers:
         if hotspot_servers.name1 == server:
             return hotspot_servers.url
 
-def dhms_to_seconds(duration):
+def duration_to_seconde(duration):
     value = 0
     if "d" in duration:
         val = duration.split("d")

@@ -5,7 +5,6 @@ import json
 from frappe.utils import random_string
 
 ### ACTION ###
-
 @frappe.whitelist()
 def create_printer_voucher(vouchers):
 	doc = frappe.new_doc('Vouchers Printer')
@@ -118,7 +117,7 @@ def create_vouchers_with_print(number_vouchers,server,limit_uptime):
 
 @frappe.whitelist()
 def clear_cache():
-    hotspot_controller = frappe.get_doc('Hotspot Controller')
+    hotspot_controller = frappe.get_single('Hotspot Controller')
     ip = hotspot_controller.ip
     frappe.cache.delete_value(f'hotspot{ip}')
     return True

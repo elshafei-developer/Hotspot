@@ -15,6 +15,7 @@ frappe.listview_settings["Vouchers"] = {
     },
   },
   onload: function (listview) {
+    console.log(listview);
     listview.refresh_button.on("click", () => {
       listview.refresh();
       frappe

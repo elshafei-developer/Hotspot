@@ -49,7 +49,7 @@ class Vouchers(Document):
         return {}
 
 ### FUNCTIONS ###
-hotspot_controller = frappe.get_doc('Hotspot Controller')
+hotspot_controller = frappe.get_single('Hotspot Controller')
 def get_vouchers(args):
     ip = hotspot_controller.ip
     if frappe.cache.get_value(f'hotspot{ip}'):
@@ -154,14 +154,6 @@ def voucher_structure(data):
 		'limit-uptime':  time,
 		"comment": f"{comment}",
 	}
-def convert_time_format(time_str):
-    parts = str(time_str).split(':')
-    hours = int(parts[0])
-    minutes = int(parts[1])
-    seconds = int(parts[2])
-    
-    formatted_time = f"{hours}h{minutes}m{seconds}s"
-    return formatted_time
 def comment_Mikrotik(voucher):
     comment = voucher['comment'] if 'comment' in voucher else '{}'
     try:
@@ -170,12 +162,12 @@ def comment_Mikrotik(voucher):
             'owner': comment_json['owner'] if 'owner' in comment_json else None,
             'creation': comment_json['creation'] if 'creation' in comment_json else '2000-01-01',
             'modified': comment_json['modified'] if 'modified' in comment_json else "2000-01-01",
-            'modified_by': comment_json['modified_by'] if 'modified_by' in comment_json else "Administrator",
+            'modified_by': comment_json['modified_by'] if 'modified_by' in comment_json else "Hotspot",
             }
     except:
         return {
             'owner': 'Hotspot',
-            'creation': 0,
-            'modified': 0,
+            'creation': '2000-01-01',
+            'modified': '2000-01-01',
             'modified_by': 'Hotspot',
         }
