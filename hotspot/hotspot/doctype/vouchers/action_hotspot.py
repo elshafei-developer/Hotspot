@@ -119,8 +119,33 @@ def create_vouchers_with_print(number_vouchers,server,limit_uptime):
 def clear_cache():
     hotspot_controller = frappe.get_single('Hotspot Controller')
     ip = hotspot_controller.ip
+    print("*"*10)
+    print(f"Clear Cache for {ip}")
+    print("*"*10)
     frappe.cache.delete_value(f'hotspot{ip}')
+    api = connect_hotspot("GET")
+    print("*"*10)
+    print(f"API => {api}")
+    print("*"*10)
+
     return True
+
+@frappe.whitelist()
+def check_connection():
+    import requests
+    try:
+        hotspot_controller = frappe.get_single('Hotspot Controller')
+        ip = hotspot_controller.ip
+        user = hotspot_controller.user
+        password = hotspot_controller.get_password()
+        response = requests.get(f"http://{ip}/rest/ip/hotspot/user",auth=(user,password))
+        if response.status_code == 200:
+            return {"status": "true"}
+        else:
+            return {"status": "false"}
+    except Exception as e:
+        return False
+
 
 ## FUNCTION ##
 def voucher_structure(data):

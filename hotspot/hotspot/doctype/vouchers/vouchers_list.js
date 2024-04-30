@@ -15,7 +15,6 @@ frappe.listview_settings["Vouchers"] = {
     },
   },
   onload: function (listview) {
-    console.log(listview);
     listview.refresh_button.on("click", () => {
       listview.refresh();
       frappe
@@ -24,6 +23,8 @@ frappe.listview_settings["Vouchers"] = {
           listview.refresh();
         });
     });
+  },
+  refresh: (listview) => {
     frappe
       .call(
         "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_info_table"

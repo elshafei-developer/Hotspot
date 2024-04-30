@@ -2,7 +2,6 @@ import frappe
 from frappe import _
 import requests
 
-@frappe.whitelist()
 def connect_hotspot(method,data=None,voucher=None):
 	hotspot_controller = frappe.get_single('Hotspot Controller')
 	ip = hotspot_controller.ip
@@ -106,3 +105,5 @@ def voucher_exists(new_name,old_name=None):
 		vouchers_exists.pop(vouchers_exists.index(old_name))
 	if new_name in vouchers_exists:
 		frappe.throw(_(f"Error: The voucher '{new_name}' already exists."))
+		
+

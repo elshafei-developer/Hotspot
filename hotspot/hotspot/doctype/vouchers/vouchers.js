@@ -4,7 +4,7 @@ frappe.ui.form.on("Vouchers", {
     frappe.set_route("Form", "Vouchers", name1);
     frm.set_value("name1", frm.doc.name);
   },
-  refresh(frm) {
+  onload(frm) {
     frappe
       .call(
         "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.get_info_table"
@@ -13,7 +13,7 @@ frappe.ui.form.on("Vouchers", {
         if (!frm.is_new()) {
           if (!r.message.servers.includes(frm.doc.server)) {
             if (frm.doc.server == "الكل") {
-              frm.set_intro("This Voucher Run on All Hotspot Server", "green");
+              frm.set_intro("This Voucher Run on All Hotspot Server", "yellow");
             } else {
               frm.set_intro(
                 "Not Found Server Hotspot For This Voucher in Hotspot Controller",
