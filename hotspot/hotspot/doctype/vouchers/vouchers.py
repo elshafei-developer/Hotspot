@@ -37,11 +37,7 @@ class Vouchers(Document):
             for voucher in vouchers:
                 owner = voucher['owner']
                 owners[owner] = owners.get(owner, 0) + 1
-            result = [{'name': owner, 'count': count} for owner, count in owners.items()]
-            return result
-        print("*"*10)
-        print(f"Vouchers => {vouchers}")
-        print("*"*10)
+            return  [{'name': owner, 'count': count} for owner, count in owners.items()]
         return vouchers
 
     @staticmethod
@@ -55,6 +51,7 @@ class Vouchers(Document):
 def get_vouchers(args):
     hotspot_controller = frappe.get_single('Hotspot Controller')
     ip = hotspot_controller.ip
+
     if frappe.cache.get_value(f'hotspot{ip}'):
         vouchers =  frappe.cache.get_value(f'hotspot{ip}')
     else:
@@ -63,7 +60,7 @@ def get_vouchers(args):
     if vouchers == False:
         frappe.throw(_(f"Error: The hotspot controller is disconnected."))
     if vouchers == "ERROR":
-        frappe.throw(_(f"Error: You are not authorized."))
+        frappe.throw(_(f"Error: Failed Authentication to Hotspot."))
     else:
         order_by = args.get('order_by','desc')
         pattern = r'`tabVouchers`\.`(\w+)`\s+(desc|asc)'
@@ -72,19 +69,18 @@ def get_vouchers(args):
             order_key = match.group(1)
         else:
             order_key = 'name'
-        vouchers_map = sorted(list(map(data_map(), vouchers)), key=lambda x: x[order_key], reverse=True if 'desc' in order_by else False)
+        vouchers_map = sorted(list(map(data_map(hotspot_controller), vouchers)), key=lambda x: x[order_key], reverse=True if 'desc' in order_by else False)
         if filters == []:
             return vouchers_map
         else:
-            print("*"*10)
-            print(f"Filters => {filters_vouchers(filters,vouchers_map)}")
-            print("*"*10)
             return filters_vouchers(filters,vouchers_map)
 def get_voucher(voucher):
+
     hotspot_controller = frappe.get_single('Hotspot Controller')
     info_voucher = connect_hotspot('GET',voucher)
     comment = comment_Mikrotik(info_voucher)
-    info_voucher['url'] = hotspot_controller.get_server_url(info_voucher['server']) if 'server' in info_voucher else 'http://localhost'
+
+    info_voucher['url'] = hotspot_controller.get_server_url(info_voucher['server']) if 'server' in info_voucher else 'http://hotspot.amalsharq.net'
     info_voucher['server'] = hotspot_controller.get_name(info_voucher['server']) if 'server' in info_voucher else 'الكل'
     info_voucher['name1'] = info_voucher['name']
     info_voucher['status'] = 'Active' if info_voucher['disabled'] == 'false' else 'Inactive'
@@ -101,30 +97,30 @@ def filters_vouchers(filters,vouchers_map):
         vouchers_filter = vouchers_map
         for f in filters:
             if 'status' in f:
-                status_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
+                status_filter = list(filter(lambda v: v["status"] in f, vouchers_filter))
                 vouchers_filter = status_filter
                 continue
             if 'limit_uptime' in f:
-                limit_uptime_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
+                limit_uptime_filter = list(filter(lambda v: v["limit_uptime"] in f, vouchers_filter))
                 vouchers_filter = limit_uptime_filter
                 continue
             if 'server' in f:
-                server_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
+                server_filter = list(filter(lambda v: v["server"] in f, vouchers_filter))
                 vouchers_filter = server_filter
                 continue
             if 'owner' in f:
-                owner_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
+                owner_filter = list(filter(lambda v: v["owner"] in f, vouchers_filter))
                 vouchers_filter = owner_filter
                 continue
             if 'create_by' in f:
-                owner_filter = list(filter(lambda v: v[f[1]] == f[-1], vouchers_filter))
+                owner_filter = list(filter(lambda v: v["create_by"] in f, vouchers_filter))
                 vouchers_filter = owner_filter
                 continue
         return vouchers_filter
 
-def data_map():
-    hotspot_controller = frappe.get_single('Hotspot Controller')
-    data_map = lambda v: {
+def data_map(hotspot_controller):
+    # hotspot_controller = frappe.get_single('Hotspot Controller')
+    return lambda v: {
                     'name':v['name'],
                     'name1':v['name'],
                     'idx':v['.id'],
@@ -142,7 +138,6 @@ def data_map():
                     "bytes_out": (int(v['bytes-out']) / 1024) / 1024,
                     "dynamic": v['dynamic'],
                     }
-    return data_map
 def voucher_structure(data):
     """
     structure of voucher that MikroTik Accept
@@ -161,14 +156,14 @@ def voucher_structure(data):
         'disabled': 'false' if data['status'] == 'Active' else 'true',
         'server': hotspot_controller.get_server(data['server']) if data['server'] != 'الكل' else 'all',
         'limit-uptime':  time,
-        "comment": f"{comment}",
+        "comment": comment
     }
 def comment_Mikrotik(voucher):
     comment = voucher['comment'] if 'comment' in voucher else '{}'
     try:
         comment_json = json.loads(comment.replace("'", "\""))
         return  {
-            'owner': comment_json['owner'] if 'owner' in comment_json else None,
+            'owner': comment_json['owner'] if 'owner' in comment_json else "Hotspot",
             'creation': comment_json['creation'] if 'creation' in comment_json else '2000-01-01',
             'modified': comment_json['modified'] if 'modified' in comment_json else "2000-01-01",
             'modified_by': comment_json['modified_by'] if 'modified_by' in comment_json else "Hotspot",
