@@ -20,7 +20,7 @@ class HotspotController(Document):
         for hotspot_servers in self.hotspot_servers:
             if hotspot_servers.name1 == name:
                 return hotspot_servers.server
-        frappe.throw(_(f"Error: The name `{name}` is not found."))
+        frappe.throw(_(f"Error: The name `{name}` is not exit."))
 
     def get_limit_uptime(self,name):
         for vouchers_times in self.vouchers_times:
@@ -29,13 +29,10 @@ class HotspotController(Document):
         frappe.throw(_(f"Error: The name `{name}` is not found."))
 
     def get_limit_uptime_name(self,duration):
-        print(duration)
-        print(duration_to_seconde(duration))
         for vouchers_times in self.vouchers_times:
             if vouchers_times.duration == duration_to_seconde(duration):
-                print(vouchers_times.name1)
                 return vouchers_times.name1
-        return None
+        return duration
 
     def get_server_url(self,server):
         for hotspot_servers in self.hotspot_servers:
@@ -60,7 +57,7 @@ def get_info_table():
 def get_server_details(server):
     hotspot_controller = frappe.get_single('Hotspot Controller')
     if server == 'الكل':
-        return 'http://localhost'
+        return 'http://hotspot.amalsharq.net'
     for hotspot_servers in hotspot_controller.hotspot_servers:
         if hotspot_servers.name1 == server:
             return hotspot_servers.url
