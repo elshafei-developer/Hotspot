@@ -10,7 +10,7 @@ def create_printer_voucher(vouchers):
 	doc = frappe.new_doc('Vouchers Printer')
 	vouchers = json.loads(vouchers)
 	if type(vouchers) != list:
-		frappe.throw(_(f"ERROR => Type Data is Not Array"))
+		frappe.throw(_(f"ERROR => Type Data is Not Acceptable"))
 		return False
 	else:
 		for voucher in list(vouchers):
@@ -96,19 +96,18 @@ def create_vouchers_with_print(number_vouchers,server,limit_uptime):
         insert_voucher(data)
     doc = frappe.new_doc('Vouchers Printer')
     for v in list(vouchers):
-            name = v['name1'].replace(' ','_')    
-            server = hotspot_controller.get_server(v['server'])
-            server_name = v['server']
-            url = hotspot_controller.get_server_url(server)
+            name = v['name1'].replace(' ','_')
+            server_name = hotspot_controller.get_server(v['server'])
+            url = hotspot_controller.get_server_url(server_name)
             doc.append('vouchers_table', {
                 'voucher': name,
-                'server':server_name,
+                'server':v['server'],
                 'url':url,
                 "limit_uptime": limit_uptime,
             })
     doc.insert()
     frappe.publish_realtime("realtime_vouchers", {
-        "message": f'<a href=" vouchers-printer/{doc.name}"> Successfully Created {number_vouchers} Vouchers for {server_name} server With Vouchers Printer  {doc.name} <b>Click for View</b></a>',
+        "message": f'<a href=" vouchers-printer/{doc.name}"> Successfully Created {number_vouchers} Vouchers for {server} server With Vouchers Printer {doc.name} <b>Click for View</b></a>',
         "indicator": "green",
         "title": "Created Vouchers",
 		"name_doc":  doc.name,
@@ -119,15 +118,7 @@ def create_vouchers_with_print(number_vouchers,server,limit_uptime):
 def clear_cache():
     hotspot_controller = frappe.get_single('Hotspot Controller')
     ip = hotspot_controller.ip
-    print("*"*10)
-    print(f"Clear Cache for {ip}")
-    print("*"*10)
     frappe.cache.delete_value(f'hotspot{ip}')
-    api = connect_hotspot("GET")
-    print("*"*10)
-    print(f"API => {api}")
-    print("*"*10)
-
     return True
 
 @frappe.whitelist()
@@ -139,13 +130,13 @@ def check_connection():
         user = hotspot_controller.user
         password = hotspot_controller.get_password()
         response = requests.get(f"http://{ip}/rest/ip/hotspot/user",auth=(user,password))
+
         if response.status_code == 200:
             return {"status": "true"}
         else:
-            return {"status": "false"}
+            return {"status": "ERROR"}
     except Exception as e:
         return False
-
 
 ## FUNCTION ##
 def voucher_structure(data):
@@ -168,14 +159,6 @@ def voucher_structure(data):
 		'limit-uptime': time,
 		"comment": f"{comment}",
 	}
-def convert_time_format(time_str):
-    parts = str(time_str).split(':')
-    hours = int(parts[0])
-    minutes = int(parts[1])
-    seconds = int(parts[2])
-    
-    formatted_time = f"{hours}h{minutes}m{seconds}s"
-    return formatted_time
 def insert_voucher(data):
     data = voucher_structure(data)  
     connect_hotspot('PUT',data)
