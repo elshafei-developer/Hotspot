@@ -16,7 +16,6 @@ frappe.listview_settings["Vouchers"] = {
   },
   onload: function (listview) {
     listview.refresh_button.on("click", () => {
-      listview.refresh();
       frappe
         .call("hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache")
         .then((r) => {
