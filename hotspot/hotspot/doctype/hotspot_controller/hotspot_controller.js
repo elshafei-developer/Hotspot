@@ -11,11 +11,10 @@ frappe.ui.form.on("Hotspot Controller", {
             "hotspot.hotspot.doctype.vouchers.action_hotspot.check_connection",
         })
         .then((r) => {
-          console.log(r);
           frm.refresh();
           if (r.message) {
-            if (r.message.status == "false") {
-              frm.set_intro(__("Failed Authorization to this Hotspot"), "red");
+            if (r.message.status == "ERROR") {
+              frm.set_intro(__("Failed Authentication to this Hotspot"), "red");
             } else {
               frm.set_intro(
                 __("Successfully Connected to the Hotspot"),
