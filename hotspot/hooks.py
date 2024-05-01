@@ -227,6 +227,6 @@ jinja = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
-### CUSTOM ###
+### CUSTOM ME ###
 clear_cache = "hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache"
 
