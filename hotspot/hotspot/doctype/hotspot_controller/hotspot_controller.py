@@ -26,7 +26,7 @@ class HotspotController(Document):
         for vouchers_times in self.vouchers_times:
             if vouchers_times.name1 == name:
                 return format_duration(vouchers_times.duration)
-        frappe.throw(_(f"Error: The name `{name}` is not found."))
+        frappe.throw(_(f"Error: The name `{name}` is not exit."))
 
     def get_limit_uptime_name(self,duration):
         for vouchers_times in self.vouchers_times:
@@ -38,6 +38,7 @@ class HotspotController(Document):
         for hotspot_servers in self.hotspot_servers:
             if hotspot_servers.server == server:
                 return hotspot_servers.url
+
 @frappe.whitelist()
 def get_info_table():
     hotspot_controller = frappe.get_single('Hotspot Controller')
