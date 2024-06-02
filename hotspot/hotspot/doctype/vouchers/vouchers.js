@@ -16,7 +16,7 @@ frappe.ui.form.on("Vouchers", {
               frm.set_intro("This Voucher Run on All Hotspot Server", "yellow");
             } else {
               frm.set_intro(
-                "Not Found Server Hotspot For This Voucher in Hotspot Controller",
+                "Not Found Server Hotspot for This Voucher in Hotspot Controller",
                 "red"
               );
             }

@@ -15,6 +15,7 @@ frappe.listview_settings["Vouchers"] = {
     },
   },
   onload: function (listview) {
+    console.log(listview);
     listview.refresh_button.on("click", () => {
       frappe
         .call("hotspot.hotspot.doctype.vouchers.action_hotspot.clear_cache")
@@ -116,7 +117,9 @@ frappe.listview_settings["Vouchers"] = {
             },
           });
         } else {
-          frappe.throw(__("Please select vouchers to create printer voucher"));
+          frappe.msgprint(
+            __("Please select vouchers to create printer voucher")
+          );
           return;
         }
       },

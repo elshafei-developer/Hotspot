@@ -33,6 +33,7 @@ def delete_inactive_vouchers():
         "title": "Deleting Inactive Vouchers",
     })
     all_vouchers = connect_hotspot("GET")
+
     inactive_vouchers = list(filter(lambda x: x['disabled'] == 'true', all_vouchers))
     if len(inactive_vouchers) == 0:
         frappe.publish_realtime("realtime_vouchers", {
@@ -71,12 +72,13 @@ def create_vouchers(number_vouchers,server,limit_uptime):
         }
         insert_voucher(data)
         vouchers.append(data)
+
     frappe.publish_realtime("realtime_vouchers", {
         "message": f"Successfully Created {number_vouchers} Vouchers.",
         "indicator": "green",
         "title": "Created Vouchers",
     })
-    return vouchers
+    # return vouchers
 def create_vouchers_with_print(number_vouchers,server,limit_uptime):
     frappe.publish_realtime("realtime_vouchers", {
 		"message": f"Creating {number_vouchers} Vouchers for {server} server...",
@@ -107,12 +109,12 @@ def create_vouchers_with_print(number_vouchers,server,limit_uptime):
             })
     doc.insert()
     frappe.publish_realtime("realtime_vouchers", {
-        "message": f'<a href=" vouchers-printer/{doc.name}"> Successfully Created {number_vouchers} Vouchers for {server} server With Vouchers Printer {doc.name} <b>Click for View</b></a>',
+        "message": f'<a href="/app/vouchers-printer/{doc.name}"> Successfully Created {number_vouchers} Vouchers for {server} server With Vouchers Printer {doc.name} <b>Click for View</b></a>',
         "indicator": "green",
         "title": "Created Vouchers",
 		"name_doc":  doc.name,
     })
-    return vouchers
+    # return vouchers
 
 @frappe.whitelist()
 def clear_cache():
@@ -120,23 +122,6 @@ def clear_cache():
     ip = hotspot_controller.ip
     frappe.cache.delete_value(f'hotspot{ip}')
     return True
-
-@frappe.whitelist()
-def check_connection():
-    import requests
-    try:
-        hotspot_controller = frappe.get_single('Hotspot Controller')
-        ip = hotspot_controller.ip
-        user = hotspot_controller.user
-        password = hotspot_controller.get_password()
-        response = requests.get(f"http://{ip}/rest/ip/hotspot/user",auth=(user,password))
-
-        if response.status_code == 200:
-            return {"status": "true"}
-        else:
-            return {"status": "ERROR"}
-    except Exception as e:
-        return False
 
 ## FUNCTION ##
 def voucher_structure(data):

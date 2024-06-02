@@ -91,3 +91,21 @@ def duration_to_seconde(duration):
         value += cint(secs)
     
     return value
+
+@frappe.whitelist()
+def check_connection():
+    import requests
+    try:
+        hotspot_controller = frappe.get_single('Hotspot Controller')
+        ip = hotspot_controller.ip
+        user = hotspot_controller.user
+        password = hotspot_controller.get_password()
+        response = requests.get(f"http://{ip}/rest/ip/hotspot/user",auth=(user,password))
+
+        if response.status_code == 200:
+            return {"status": "true"}
+        else:
+            return {"status": "ERROR"}
+    except Exception as e:
+        return False
+    

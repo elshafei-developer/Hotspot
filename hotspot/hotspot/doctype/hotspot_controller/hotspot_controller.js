@@ -8,7 +8,7 @@ frappe.ui.form.on("Hotspot Controller", {
       frappe
         .call({
           method:
-            "hotspot.hotspot.doctype.vouchers.action_hotspot.check_connection",
+            "hotspot.hotspot.doctype.hotspot_controller.hotspot_controller.check_connection",
         })
         .then((r) => {
           frm.refresh();

@@ -119,7 +119,6 @@ def filters_vouchers(filters,vouchers_map):
         return vouchers_filter
 
 def data_map(hotspot_controller):
-    # hotspot_controller = frappe.get_single('Hotspot Controller')
     return lambda v: {
                     'name':v['name'],
                     'name1':v['name'],
