@@ -8,6 +8,22 @@ from frappe.utils import format_duration
 from frappe.utils import cint
 
 class HotspotController(Document):
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from frappe.types import DF
+        from hotspot.hotspot.doctype.servers_table.servers_table import ServersTable
+        from hotspot.hotspot.doctype.times_table.times_table import TimesTable
+
+        hotspot_servers: DF.Table[ServersTable]
+        ip: DF.Data
+        password: DF.Password
+        user: DF.Data
+        vouchers_times: DF.Table[TimesTable]
+    # end: auto-generated types
     def get_name(self,server):
         for hotspot_servers in self.hotspot_servers:
             if hotspot_servers.server == server:

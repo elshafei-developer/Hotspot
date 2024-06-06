@@ -16,7 +16,8 @@
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Name"
+   "label": "Name",
+   "reqd": 1
   },
   {
    "fieldname": "duration",
@@ -24,13 +25,14 @@
    "hide_seconds": 1,
    "in_list_view": 1,
    "in_preview": 1,
-   "label": "Duration"
+   "label": "Duration",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-04-30 16:34:46.189165",
+ "modified": "2024-06-06 15:28:12.653676",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Times Table",

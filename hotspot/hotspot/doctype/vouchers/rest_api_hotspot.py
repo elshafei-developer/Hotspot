@@ -49,7 +49,7 @@ def GET(value_hotspot,name=None):
 				frappe.cache.set_value(f'hotspot{ip}', filtered_data, expires_in_sec=3600)
 				return filtered_data
 			else:
-				return "ERROR"
+				return "401"
 		except requests.exceptions.RequestException as e:
 			frappe.cache.delete_value(f'hotspot{ip}')
 			return False

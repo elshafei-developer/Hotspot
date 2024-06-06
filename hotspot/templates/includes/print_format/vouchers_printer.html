@@ -34,9 +34,27 @@
       width: 120px;
       height: 120px;
     }
+    .urlNot {
+      width: 120px;
+      text-align: center;
+    }
+    .urlNot + p{
+        background-color: black;
+        color: white;
+        padding: 0 10px;
+    }
   </style>
   <ul>
     {% for item in doc.vouchers_table %}
+    {%if item.url == None%}
+    <li>
+        <p class="name_company">{{item.server}}</p>
+        <div class="urlNot">
+            url Not found for this voucher in Hotspot Controller
+        </div>
+        <p>{{item.voucher}}</p>
+      </li>
+    {%else%}
     <li>
       <p class="name_company">{{item.server}}</p>
       <div class="QR">
@@ -45,6 +63,7 @@
       </div>
       <p>{{item.voucher}}</p>
     </li>
+    {% endif %}
     {% endfor %}
   </ul>
 </body>

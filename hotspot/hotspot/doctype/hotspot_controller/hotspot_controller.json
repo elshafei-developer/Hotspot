@@ -20,17 +20,23 @@
   {
    "fieldname": "ip",
    "fieldtype": "Data",
-   "label": "IP"
+   "in_list_view": 1,
+   "label": "IP",
+   "reqd": 1
   },
   {
    "fieldname": "user",
    "fieldtype": "Data",
-   "label": "User"
+   "in_list_view": 1,
+   "label": "User",
+   "reqd": 1
   },
   {
    "fieldname": "password",
    "fieldtype": "Password",
-   "label": "Password"
+   "in_list_view": 1,
+   "label": "Password",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_jkbe",
@@ -68,7 +74,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-04-29 14:17:11.794108",
+ "modified": "2024-06-06 14:15:25.643230",
  "modified_by": "Administrator",
  "module": "Hotspot",
  "name": "Hotspot Controller",

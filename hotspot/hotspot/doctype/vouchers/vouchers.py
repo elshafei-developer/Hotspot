@@ -49,31 +49,38 @@ class Vouchers(Document):
 
 ### FUNCTIONS ###
 def get_vouchers(args):
-    hotspot_controller = frappe.get_single('Hotspot Controller')
-    ip = hotspot_controller.ip
+    try:
+        hotspot_controller = frappe.get_single('Hotspot Controller')
+        ip = hotspot_controller.ip
+        if ip == "":
+            frappe.throw("IP not found in Hotspot Controller!")
 
-    if frappe.cache.get_value(f'hotspot{ip}'):
-        vouchers =  frappe.cache.get_value(f'hotspot{ip}')
-    else:
-        vouchers = connect_hotspot('GET')
-    filters = args.get('filters',[])
-    if vouchers == False:
-        frappe.throw(_(f"Error: The hotspot controller is disconnected."))
-    if vouchers == "ERROR":
-        frappe.throw(_(f"Error: Failed Authentication to Hotspot."))
-    else:
-        order_by = args.get('order_by','desc')
-        pattern = r'`tabVouchers`\.`(\w+)`\s+(desc|asc)'
-        match = re.search(pattern, order_by)
-        if match:
-            order_key = match.group(1)
+        if frappe.cache.get_value(f'hotspot{ip}'):
+            vouchers =  frappe.cache.get_value(f'hotspot{ip}')
         else:
-            order_key = 'name'
-        vouchers_map = sorted(list(map(data_map(hotspot_controller), vouchers)), key=lambda x: x[order_key], reverse=True if 'desc' in order_by else False)
-        if filters == []:
-            return vouchers_map
+            vouchers = connect_hotspot('GET')
+            
+        filters = args.get('filters',[])
+        if vouchers == False:
+            frappe.throw(_(f"Error: The hotspot controller is disconnected."))
+        if vouchers == "401":
+            frappe.throw(_(f"Error: Failed Authentication to Hotspot."))
         else:
-            return filters_vouchers(filters,vouchers_map)
+            order_by = args.get('order_by','desc')
+            pattern = r'`tabVouchers`\.`(\w+)`\s+(desc|asc)'
+            match = re.search(pattern, order_by)
+            if match:
+                order_key = match.group(1)
+            else:
+                order_key = 'name'
+            vouchers_map = sorted(list(map(data_map(hotspot_controller), vouchers)), key=lambda x: x[order_key], reverse=True if 'desc' in order_by else False)
+            if filters == []:
+                return vouchers_map
+            else:
+                return filters_vouchers(filters,vouchers_map)
+    except:
+        return False
+    
 def get_voucher(voucher):
 
     hotspot_controller = frappe.get_single('Hotspot Controller')
@@ -132,7 +139,7 @@ def data_map(hotspot_controller):
                     "create_by": comment_Mikrotik(v)['owner'],
 					"creation1" : comment_Mikrotik(v)['creation'],
 					"creation" : comment_Mikrotik(v)['creation'],
-					"modified" : comment_Mikrotik(v)['modified'],
+					"modified" : str(comment_Mikrotik(v)['modified']),
                     "bytes_in": (int(v['bytes-in']) / 1024) / 1024,
                     "bytes_out": (int(v['bytes-out']) / 1024) / 1024,
                     "dynamic": v['dynamic'],
