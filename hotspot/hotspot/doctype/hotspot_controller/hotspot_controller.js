@@ -27,4 +27,11 @@ frappe.ui.form.on("Hotspot Controller", {
         });
     });
   },
+  ip(frm){
+    function cleanIpLike(inputString) {
+        return inputString.replace(/[^0-9.]/g, '');
+    }
+        frm.doc.ip = cleanIpLike(frm.doc.ip)
+        frm.refresh_field('ip')
+  }
 });
