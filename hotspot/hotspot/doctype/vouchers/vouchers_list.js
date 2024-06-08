@@ -122,8 +122,7 @@ frappe.listview_settings["Vouchers"] = {
           );
           return;
         }
-      },
-      "Actions"
+      }
     );
     listview.page.add_inner_button(
       __("Delete Inactive Vouchers"),
@@ -148,8 +147,7 @@ frappe.listview_settings["Vouchers"] = {
               });
           }
         );
-      },
-      "Actions"
+      }
     );
   },
 };
